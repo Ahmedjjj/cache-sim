@@ -48,7 +48,7 @@ public final class MesiCache extends Cache {
                             //checks if this block was present in other caches or it had to go to memory
                             mesiCacheBlock.setMesiState(MesiState.SHARED);
                         }else{
-                            getBus().fetchFromMemory(this.getId(), processingRequest.getAddress());
+                            //getBus().fetchFromMemory(this.getId(), processingRequest.getAddress());
                             mesiCacheBlock.setMesiState(MesiState.EXCLUSIVE);
                         }
                     }
