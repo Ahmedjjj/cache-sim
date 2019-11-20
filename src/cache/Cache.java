@@ -1,28 +1,29 @@
 package cache;
 
 import bus.Bus;
+import bus.BusController;
 import bus.Request;
 import cache.instruction.CacheInstruction;
 import cache.lru.LruQueue;
 import common.Clocked;
 import cpu.Cpu;
-import dragon.DragonCacheBlock;
+
 
 
 public abstract class Cache implements Clocked {
 
-    private final int cacheSize;
-    private final int blockSize;
-    private final LruQueue[] lruQueues;
-
-
+    protected final int cacheSize;
+    protected final int blockSize;
+    protected final LruQueue[] lruQueues;
     protected final int numLines;
     protected final int associativity;
     protected final int id;
 
-    private Cpu cpu;
-    private Bus bus;
-
+    protected Cpu cpu;
+    protected BusController busController;
+    protected Bus bus;
+    protected CacheState state;
+    private Request request;
     public Cache(int id, int cacheSize, int blockSize, int associativity) {
 
         this.id=id;
@@ -31,18 +32,48 @@ public abstract class Cache implements Clocked {
         this.associativity = associativity;
         this.numLines = cacheSize / (blockSize * associativity);
         this.lruQueues = new LruQueue[this.numLines];
+        this.state = CacheState.IDLE;
         for (int i = 0; i < numLines; i++) {
             lruQueues[i] = new LruQueue(associativity);
         }
     }
+    public void linkCpu(Cpu cpu){
+        this.cpu = cpu;
+    }
 
-    public abstract void notifyChange(Request processingRequest) ;
+    public int notifyRequestAndGetExtraCycles(Request request) {
+        boolean isOriginalSender = request.getSenderId() == this.id;
+
+        if (!isOriginalSender){
+            return snoopTransition(request);
+        }else{
+            return receiveMessage(request);
+        }
+
+    }
+
+    protected abstract int receiveMessage(Request request);
+
+    protected abstract int snoopTransition(Request request);
+
     public abstract void ask(CacheInstruction instruction);
+
+    public abstract boolean hasBlock(int address);
+    public void setRequest(Request request){
+        this.request=request;
+    }
+    public void linkBusController(BusController busController){
+        this.busController=busController;
+    }
+    public Request getRequest(){
+        return request;
+    }
+    public boolean hasRequest(){
+        return request!=null;
+    }
 
     public int getId(){
         return id;
-    }
-    public void notifyOver() {
     }
 
     public int getBlockSize() {
@@ -55,9 +86,7 @@ public abstract class Cache implements Clocked {
     public Bus getBus(){
         return bus;
     }
-    public void linkCpu(Cpu p) {
-        this.cpu = p;
-    }
+
     public Cpu getCpu(){
         return cpu;
     }

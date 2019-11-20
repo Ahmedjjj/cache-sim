@@ -64,7 +64,6 @@ public final class Cpu implements Clocked {
     private void executeInstruction(Instruction instruction) {
         switch (instruction.getType()) {
             case READ: {
-
                 numLoad++;
                 CacheInstruction cacheInstruction = new CacheInstruction(CacheInstructionType.READ,
                         instruction.getSecondField());

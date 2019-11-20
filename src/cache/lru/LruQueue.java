@@ -26,9 +26,11 @@ public final class LruQueue {
         blocks.remove(updated);
         blocks.add (updated);
     }
+
     public int blockToEvacuate (){
         return blocks.get(0).block;
     }
+
     public void evacuate() {
         update (blockToEvacuate());
     }

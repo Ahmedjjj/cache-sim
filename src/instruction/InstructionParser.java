@@ -16,13 +16,14 @@ public final class InstructionParser {
 
     public static Queue<Instruction> parseInstructions (String filePath){
         Queue <Instruction> instructions = new LinkedList<>();
-
+        int maxInstr= 100000;
         try (Scanner scanner = new Scanner(new File(filePath))){
-            while(scanner.hasNextInt()){
+            while(maxInstr!=0&&scanner.hasNextInt()){
                 InstructionType type = InstructionType.values()[scanner.nextInt()];
                 int otherField = Integer.parseUnsignedInt(scanner.next().substring(2), HEX_RADIX);
                 Instruction instruction = new Instruction(type,otherField);
                 instructions.add(instruction);
+                maxInstr--;
             }
         }
         catch (FileNotFoundException e){
