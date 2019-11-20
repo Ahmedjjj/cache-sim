@@ -64,7 +64,7 @@ public final class Main {
     }
 
     private static void runUntilEnd(List<Cpu> processors, List<Cache> caches, Bus bus) {
-int maxcycles= 30000;
+int maxcycles= 3000000;
         while (maxcycles!=0&&!allFinished(processors)) {
             bus.runForOneCycle();
             caches.forEach(c -> c.runForOneCycle());
