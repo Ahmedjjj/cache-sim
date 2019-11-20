@@ -104,20 +104,24 @@ public class DragonCache extends Cache {
         BusEvent busEvent = request.getBusEvent();
         int address = request.getAddress();
         boolean sharedSignal = busController.checkExistenceInOtherCaches(this.id, address);
+        if(dragonCacheBlock==null)
+            return 0;
         switch (dragonCacheBlock.getState()) {
             //shouldn't be null since it's this cache that generated the request for it
             case EXCLUSIVE:
-                if (busEvent == BusEvent.BusRd)
+                if (busEvent == BusEvent.BusRd) {
                     dragonCacheBlock.setState(DragonState.SC);
+                    return blockSize/Constants.BUS_WORD_LATENCY;                }
                 break;
             case SM:
                 if (busEvent == BusEvent.BusUpd) {
                     dragonCacheBlock.setState(DragonState.SC);
+                    return 0; //??  not sure
                 }
                 if (busEvent == BusEvent.BusRd) {
                     //getBus().flushMemory(new DataRequest(this.getId(), BusEvent.Flush, processingRequest.getAddress(), 100));
                     //stays in sm, maybe not flush memory, just send the data on the bus
-                    return Constants.MEMORY_LATENCY;
+                    return Constants.MEMORY_LATENCY + blockSize/Constants.BUS_WORD_LATENCY; //?? isnt it
                 }
                 break;
             case SC:
@@ -250,7 +254,7 @@ public class DragonCache extends Cache {
             }
             break;
 
-            case NOT_IN_CACHE: {
+            case NOT_IN_CACHE: {//miss
                 int blockToEvacuate = lruQueues[line].blockToEvacuate();
                 DragonCacheBlock evacuatedCacheBlock = dragonCacheBlocks[line][blockToEvacuate];
                 if (evacuatedCacheBlock.getState() == DragonState.MODIFIED){

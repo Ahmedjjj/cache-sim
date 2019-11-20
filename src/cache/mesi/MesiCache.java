@@ -50,6 +50,7 @@ public final class MesiCache extends Cache {
                 this.memoryCycles --;
                 if(memoryCycles == 0){
                     cacheBlockToEvacuate.setMesiState(MesiState.INVALID);
+                    long k= cpu.getCycleCount();
                     ask(new CacheInstruction(currentType,currentAddress));
                 }
                 break;
@@ -59,6 +60,7 @@ public final class MesiCache extends Cache {
 
     @Override
     public void ask(CacheInstruction instruction) {
+        long n= cpu.getCycleCount();
         int address = instruction.getAddress();
         int line = getLineNumber(address);
         int tag = getTag(address);
@@ -111,7 +113,7 @@ public final class MesiCache extends Cache {
                 evacuatedCacheBlock.setMesiState(MesiState.INVALID);
                 evacuatedCacheBlock.setTag(tag);
                 this.busController.queueUp(this);
-                this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
+                this.state = CacheState.WAITING_FOR_BUS_DATA;
             }
         }
     }
@@ -135,7 +137,7 @@ protected int receiveMessage(Request request){
         if (this.state == CacheState.WAITING_FOR_BUS_DATA){
             if (request.isDataRequest()){
                 busTransactionOver();
-            }else if (!busController.checkExistenceInAllCaches(request.getAddress())){
+            }else if (!busController.checkExistenceInOtherCaches(id,request.getAddress())){
                 this.state = CacheState.WAITING_FOR_BUS_DATA;
                 return Constants.MEMORY_LATENCY;
             }
@@ -249,6 +251,9 @@ int tag = super.getTag(address);
         }
         this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
         return new Request(id, event, currentAddress, Constants.BUS_MESSAGE_CYCLES,false);
+    }
+    public String toString(){
+        return "Cache "+ id;
     }
     public int getNbCacheMiss() {
         return cacheMiss;

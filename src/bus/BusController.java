@@ -57,20 +57,22 @@ public final class BusController {
     public boolean checkExistenceInOtherCaches(int senderId, int address) {
         return caches.stream().anyMatch(c -> c.getId()!=senderId&&c.hasBlock(address));
     }
-
+boolean executing=false;
     public void queueUp (Cache cache){
         assert !cacheQueue.contains(cache);
-        if (cacheQueue.isEmpty()){
+        if (cacheQueue.isEmpty()&&currentRequest==null){
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
             this.currentBusMaster = cache;
         }else{
             this.cacheQueue.add(cache);
+
         }
     }
     private void setNewRequest(){
         if (!cacheQueue.isEmpty()){
             Cache cache = cacheQueue.poll();
+            System.out.println(cache);
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
             this.currentBusMaster = cache;
