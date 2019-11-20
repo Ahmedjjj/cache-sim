@@ -1,4 +1,5 @@
 import bus.Bus;
+import bus.BusController;
 import cache.Cache;
 import cache.Protocol;
 import cache.mesi.MesiCache;
@@ -34,7 +35,11 @@ public final class Main {
 
         List<Cpu> processors = new ArrayList<Cpu>();
         List<Cache> caches = new ArrayList<Cache>();
+        BusController controller = new BusController();
         Bus bus = new Bus();
+        bus.attachTo(controller);
+        controller.attachTo(bus);
+       
 
 
         File dir = new File(traceFile);
@@ -51,11 +56,11 @@ public final class Main {
             processors.add(p);
             caches.add(cache);
             cache.linkCpu(p);
-            bus.addCache(cache);
+            controller.attach(cache);
         }
 
-        //runUntilEnd(processors,caches,bus);
-        printResults(processors, caches, bus);
+        runUntilEnd(processors,caches,bus);
+        printResults (processors,caches,bus);
     }
 
     private static void runUntilEnd(List<Cpu> processors, List<Cache> caches, Bus bus) {

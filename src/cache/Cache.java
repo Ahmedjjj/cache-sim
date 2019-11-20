@@ -1,27 +1,27 @@
 package cache;
 
 import bus.Bus;
+import bus.BusController;
 import bus.Request;
 import cache.instruction.CacheInstruction;
 import cache.lru.LruQueue;
 import common.Clocked;
 import cpu.Cpu;
-import dragon.DragonCacheBlock;
+
 
 
 public abstract class Cache implements Clocked {
 
-    private final int cacheSize;
-    private final int blockSize;
-    private final LruQueue[] lruQueues;
-
-
+    protected final int cacheSize;
+    protected final int blockSize;
+    protected final LruQueue[] lruQueues;
     protected final int numLines;
     protected final int associativity;
     protected final int id;
 
-    private Cpu cpu;
-    private Bus bus;
+    protected Cpu cpu;
+    protected BusController busController;
+    protected CacheState state;
 
     public Cache(int id, int cacheSize, int blockSize, int associativity) {
 
@@ -31,18 +31,25 @@ public abstract class Cache implements Clocked {
         this.associativity = associativity;
         this.numLines = cacheSize / (blockSize * associativity);
         this.lruQueues = new LruQueue[this.numLines];
+        this.state = CacheState.IDLE;
         for (int i = 0; i < numLines; i++) {
             lruQueues[i] = new LruQueue(associativity);
         }
     }
+    public void linkCpu(Cpu cpu){
+        this.cpu = cpu;
+    }
 
-    public abstract void notifyChange(Request processingRequest) ;
+    public abstract int notifyRequestAndGetExtraCycles(Request request);
+
     public abstract void ask(CacheInstruction instruction);
+
+    public abstract boolean hasBlock(int address);
+
+    public abstract Request getRequest();
 
     public int getId(){
         return id;
-    }
-    public void notifyOver() {
     }
 
     public int getBlockSize() {

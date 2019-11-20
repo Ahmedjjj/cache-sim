@@ -24,8 +24,13 @@ public class DragonCache extends Cache {
     }
 
     @Override
-    public void notifyChange(Request processingRequest) {
-        DragonCacheBlock dragonCacheBlock = this.getCacheBlock(processingRequest.getAddress());
+    public int notifyRequestAndGetExtraCycles(Request request) {
+        return 0;
+    }
+
+    
+    public void notify(Request processingRequest) {
+        DragonCacheBlock dragonCacheBlock = (DragonCacheBlock) this.getCacheBlock(processingRequest.getAddress());
         BusEvent busEvent = processingRequest.getBusEvent();
         int address=processingRequest.getAddress();
         boolean sharedSignal = getBus().askOthers(this.id, address);
@@ -151,6 +156,14 @@ public class DragonCache extends Cache {
     }
 
     @Override
+    public boolean hasBlock(int address) {
+        return false;
+    }
+
+    @Override
+    public Request getRequest() {
+        return null;
+    }
     public int getNbCacheMiss() {
         return cacheMiss;
     }
