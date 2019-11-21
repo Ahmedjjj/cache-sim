@@ -19,6 +19,8 @@ public final class Cpu implements Clocked {
     private int instructionCount;
     private int executingCyclesLeft;
 
+
+
     private int totalComputingCycles;
     private int totalIdleCycles;
     private int numLoad;
@@ -37,6 +39,7 @@ public final class Cpu implements Clocked {
         totalIdleCycles = 0;
         numLoad = 0;
         numStore=0;
+
 
     }
 
