@@ -2,6 +2,7 @@ package bus;
 
 
 import cache.Cache;
+import cache.CacheState;
 import common.Constants;
 
 import java.util.LinkedList;
@@ -45,10 +46,13 @@ public final class BusController {
                 busTraffic+=extra;
             }
         }
-        if (extra_cycles > 0){
+        if (extra_cycles > 0 && currentRequest.senderNeedsData()){
             currentRequest.setCyclesToExecute(extra_cycles);
             currentRequest.setDataRequest(true);
         }else{
+
+            Cache sender = caches.stream().filter(c -> c.getId() == currentRequest.getSenderId()).findFirst().get();
+            assert sender.getState() == CacheState.IDLE;
             setNewRequest();
         }
     }
@@ -58,15 +62,15 @@ public final class BusController {
     }
 
     public boolean checkExistenceInOtherCaches(int senderId, int address) {
-        return caches.stream().anyMatch(c -> c.getId()!=senderId&&c.hasBlock(address));
+        return caches.stream().anyMatch(c -> c.getId()!=senderId && c.cacheHit(address));
     }
-boolean executing=false;
+
     public void queueUp (Cache cache){
+        if (cacheQueue.contains(cache)){
+          //
+        };
+        System.out.println(cacheQueue);
         assert !cacheQueue.contains(cache);
-        int k;
-        if(cacheQueue.size()>4)
-           k = cacheQueue.size();
-           // throw new IllegalStateException();
         if (cacheQueue.isEmpty()&&currentRequest==null){
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
@@ -77,12 +81,15 @@ boolean executing=false;
         }
     }
     private void setNewRequest(){
+        //System.out.println("a");
         if (!cacheQueue.isEmpty()){
             Cache cache = cacheQueue.poll();
            // System.out.println(cache);
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
             this.currentBusMaster = cache;
+        }else {
+            bus.setCurrentRequest(null);
         }
     }
 

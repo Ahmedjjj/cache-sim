@@ -38,7 +38,6 @@ public final class Main {
         Bus bus = new Bus();
         bus.attachTo(controller);
         controller.attachTo(bus);
-       
 
 
         File dir = new File(traceFile);
@@ -58,19 +57,19 @@ public final class Main {
             controller.attach(cache);
         }
 
-        runUntilEnd(processors,caches,bus);
-        printResults (processors,caches,bus);
+        runUntilEnd(processors, caches, bus);
+        printResults(processors, caches, bus);
     }
 
     private static void runUntilEnd(List<Cpu> processors, List<Cache> caches, Bus bus) {
-int maxcycles= 3000000;
+        int maxcycles = 3000000;
         //while (maxcycles!=0&&
-                while(!allFinished(processors)) {
+        while (!allFinished(processors)) {
             bus.runForOneCycle();
             caches.forEach(c -> c.runForOneCycle());
             Collections.shuffle(processors);
             processors.forEach(p -> p.runForOneCycle());
-           // maxcycles--;
+            // maxcycles--;
         }
     }
 
@@ -93,7 +92,7 @@ int maxcycles= 3000000;
         System.out.println("Data traffic on the bus in bytes: " + bus.getBusTraffic());
         System.out.println("Number of invalidations on the bus: " + bus.getNbInvalidates());
         System.out.println("Number of updates sent on the bus: " + bus.getNbUpdates());
-        System.out.println("Number of accesses to private data: "+ Cache.getPrivateAccess());
-        System.out.println("Number of accesses to shared data: "+ Cache.getSharedAccess());
+        System.out.println("Number of accesses to private data: " + Cache.getPrivateAccess());
+        System.out.println("Number of accesses to shared data: " + Cache.getSharedAccess());
     }
 }
