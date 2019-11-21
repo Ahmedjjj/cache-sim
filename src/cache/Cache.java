@@ -54,6 +54,10 @@ public abstract class Cache implements Clocked {
 
     }
 
+    public CacheState getState() {
+        return state;
+    }
+
     protected abstract int receiveMessage(Request request);
 
     protected abstract int snoopTransition(Request request);

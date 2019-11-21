@@ -54,7 +54,7 @@ public final class Bus implements Clocked {
                   nbUpdates++;
               else if(currentRequest.getBusEvent()==BusEvent.BusRdX)
                   nbInvalidates++;
-                busController.alert();
+              busController.alert();
             }
         }
     }

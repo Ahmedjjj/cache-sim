@@ -8,15 +8,22 @@ public final class Request {
     private boolean isDataRequest;
 
 
-
+    private boolean senderNeedsData;
     private int cyclesToExecute;
 
+    public boolean senderNeedsData(){
+        return senderNeedsData;
+    }
     public void setCyclesToExecute(int cyclesToExecute) {
         this.cyclesToExecute = cyclesToExecute;
     }
 
     public boolean isDataRequest() {
         return isDataRequest;
+    }
+
+    public void setSenderNeedsData(boolean senderNeedsData) {
+        this.senderNeedsData = senderNeedsData;
     }
 
     public boolean done(){
@@ -26,10 +33,11 @@ public final class Request {
         isDataRequest = dataRequest;
     }
 
-    public Request(int senderId, BusEvent busEvent, int address, int cyclesToExecute, boolean isDataRequest){
+    public Request(int senderId, BusEvent busEvent, int address, int cyclesToExecute, boolean senderNeedsData){
         this.senderId=senderId;
         this.address=address;
-        this.isDataRequest = isDataRequest;
+        this.senderNeedsData = senderNeedsData;
+        this.isDataRequest = false;
         this.cyclesToExecute=cyclesToExecute;
         this.busEvent=busEvent;
     }
