@@ -69,7 +69,7 @@ public final class BusController {
         if (cacheQueue.contains(cache)){
           //
         };
-        System.out.println(cacheQueue);
+        //System.out.println(cacheQueue);
         assert !cacheQueue.contains(cache);
         if (cacheQueue.isEmpty()&&currentRequest==null){
             this.currentRequest = cache.getRequest();
@@ -88,7 +88,8 @@ public final class BusController {
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
             this.currentBusMaster = cache;
-        }else {
+        }else{
+            currentRequest=null;
             bus.setCurrentRequest(null);
         }
     }

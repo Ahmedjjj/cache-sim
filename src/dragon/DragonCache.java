@@ -195,7 +195,9 @@ public class DragonCache extends Cache {
         return getBlockState(address) != DragonState.NOT_IN_CACHE;
     }
 
-
+public String toString(){
+        return "Dragon "+id;
+}
 
 
     @Override
@@ -216,8 +218,17 @@ public class DragonCache extends Cache {
         } else {
             event = BusEvent.BusUpd;
         }
-        this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
-        return new Request(id, event, currentAddress, Constants.BUS_MESSAGE_CYCLES, false);
+        boolean senderNeedsData ;
+        if (cacheHit(currentAddress)) {
+             this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
+
+            senderNeedsData = false;
+        }else{
+             this.state = CacheState.WAITING_FOR_BUS_DATA;
+            senderNeedsData = true;
+        }
+        //this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
+        return new Request(id, event, currentAddress, Constants.BUS_MESSAGE_CYCLES, senderNeedsData);
     }
 
 

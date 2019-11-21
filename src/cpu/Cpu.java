@@ -5,6 +5,7 @@ import cache.instruction.CacheInstruction;
 import cache.instruction.CacheInstructionType;
 import common.Clocked;
 import instruction.Instruction;
+import instruction.InstructionType;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -41,11 +42,16 @@ public final class Cpu implements Clocked {
     }
 
     public void runForOneCycle() {
+        if(cycleCount%10000==0){
+            state=state;
+        }
+
         switch (state) {
             case IDLE:
                 Instruction instruction = instructions.poll();
                 if (instruction != null) {
                     executeInstruction(instruction);
+                    if(instruction.getType()== InstructionType.READ||instruction.getType()== InstructionType.WRITE)
                     instructionCount++;
                 }
                 break;
@@ -58,6 +64,7 @@ public final class Cpu implements Clocked {
                     setState(CpuState.IDLE);
                 }
         }
+        if(!finishedExecution())
         cycleCount++;
     }
 

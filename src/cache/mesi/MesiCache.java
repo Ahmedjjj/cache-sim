@@ -93,7 +93,6 @@ public final class MesiCache extends Cache {
 
 
             if (evacuatedCacheBlock.getMesiState() == MesiState.MODIFIED) {
-
                 this.cacheBlockToEvacuate = evacuatedCacheBlock;
                 this.memoryCycles = Constants.L1_CACHE_EVICTION_LATENCY;
                 this.state = CacheState.WAITING_FOR_MEMORY;
