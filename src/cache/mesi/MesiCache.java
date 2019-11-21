@@ -253,10 +253,10 @@ int num =0;
 
         boolean senderNeedsData ;
         if (cacheHit(currentAddress)) {
-            assert this.state == CacheState.WAITING_FOR_BUS_MESSAGE;
+            //assert this.state == CacheState.WAITING_FOR_BUS_MESSAGE;
             senderNeedsData = false;
         }else{
-            assert this.state == CacheState.WAITING_FOR_BUS_DATA;
+            //assert this.state == CacheState.WAITING_FOR_BUS_DATA;
             senderNeedsData = true;
         }
     request = new Request(id, event, currentAddress, Constants.BUS_MESSAGE_CYCLES, senderNeedsData);

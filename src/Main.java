@@ -55,6 +55,7 @@ public final class Main {
             caches.add(cache);
             cache.linkCpu(p);
             controller.attach(cache);
+
         }
 
         runUntilEnd(processors, caches, bus);
