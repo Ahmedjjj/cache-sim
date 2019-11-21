@@ -104,7 +104,6 @@ public final class MesiCache extends Cache {
             cacheMiss++;
             int blockToEvacuate = lruQueues[line].blockToEvacuate();
             MesiCacheBlock evacuatedCacheBlock = cacheBlocks[line][blockToEvacuate];
-
             if (evacuatedCacheBlock.getMesiState() == MesiState.MODIFIED){
                 this.cacheBlockToEvacuate = evacuatedCacheBlock;
                 this.memoryCycles = Constants.L1_CACHE_EVICTION_LATENCY;
