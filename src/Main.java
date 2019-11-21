@@ -19,7 +19,6 @@ public final class Main {
 
 
     public static void main(String[] args) {
-
         if (args.length < 5) {
             System.err.println("Too few arguments, Usage : Protocol Input cache_size " +
                     "associativity block_size");
@@ -65,12 +64,13 @@ public final class Main {
 
     private static void runUntilEnd(List<Cpu> processors, List<Cache> caches, Bus bus) {
 int maxcycles= 3000000;
-        while (maxcycles!=0&&!allFinished(processors)) {
+        //while (maxcycles!=0&&
+                while(!allFinished(processors)) {
             bus.runForOneCycle();
             caches.forEach(c -> c.runForOneCycle());
             Collections.shuffle(processors);
             processors.forEach(p -> p.runForOneCycle());
-            maxcycles--;
+           // maxcycles--;
         }
     }
 
@@ -90,10 +90,10 @@ int maxcycles= 3000000;
         processors.forEach(p -> System.out.println("Number of Store instructions for core " + processors.indexOf(p) + ": " + p.getNumStore()));
         processors.forEach(p -> System.out.println("Number of Idle cycles for core " + processors.indexOf(p) + ": " + p.getTotalIdleCycles()));
         caches.forEach(c -> System.out.println("Cache miss rate for cache " + c.getId() + ": " + c.getMissRate()));
-//        System.out.println("Data traffic on the bus in bytes: " + bus.getBusTraffic());//todo
-//        System.out.println("Number of invalidations on the bus: " + bus.getNbInvalidates());
-//        System.out.println("Number of updates sent on the bus: " + bus.getNbUpdates());
-        System.out.println("Number of accesses to private data: ");
-        System.out.println("Number of accesses to shared data: ");
+        System.out.println("Data traffic on the bus in bytes: " + bus.getBusTraffic());
+        System.out.println("Number of invalidations on the bus: " + bus.getNbInvalidates());
+        System.out.println("Number of updates sent on the bus: " + bus.getNbUpdates());
+        System.out.println("Number of accesses to private data: "+ Cache.getPrivateAccess());
+        System.out.println("Number of accesses to shared data: "+ Cache.getSharedAccess());
     }
 }

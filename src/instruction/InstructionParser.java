@@ -16,7 +16,7 @@ public final class InstructionParser {
 
     public static Queue<Instruction> parseInstructions (String filePath){
         Queue <Instruction> instructions = new LinkedList<>();
-        int maxInstr= 100000;
+        int maxInstr=29;
         try (Scanner scanner = new Scanner(new File(filePath))){
             while(maxInstr!=0&&scanner.hasNextInt()){
                 InstructionType type = InstructionType.values()[scanner.nextInt()];
