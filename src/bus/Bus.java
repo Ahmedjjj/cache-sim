@@ -11,54 +11,34 @@ import java.util.List;
 
 
 public final class Bus implements Clocked {
-// =======
-// public class Bus implements Clocked {
-//     private boolean isBusy;
-//     private List<Cache> caches;
-//     private List<Request> requests;
-//     private Request processingRequest;
-//     private int busTraffic;
-//     private int nbUpdates;
-//     private int nbInvalidates;
 
-//     public Bus() {
-//         caches = new ArrayList<>();
-//         requests = new LinkedList<>();
-//         isBusy = false;
-//         busTraffic = 0;
-//         nbUpdates = 0;
-//         nbInvalidates = 0;
-// >>>>>>> master
 
+     private int nbUpdates;
+     private int nbInvalidates;
     private BusController busController;
     private Request currentRequest;
 
 
 
-    public Bus(){
+    public Bus() {
         this.currentRequest = null;
-
-//     public boolean isBusy() {
-//         return isBusy;
-//     }
-
-//     public int getBusTraffic() {
-//         return busTraffic;
-//     }
-
-//     public int getNbInvalidates() {
-//         return nbInvalidates;
-//     }
-
-//     public int getNbUpdates() {
-//         return nbUpdates;
-//     }
-
-//     public void addCache(Cache cache) {
-//         caches.add(cache);
-//         cache.linkBus(this);
-
     }
+
+     public int getBusTraffic() {
+         return busController.getBusTraffic();
+     }
+
+     public int getNbInvalidates() {
+         return nbInvalidates;
+     }
+
+     public int getNbUpdates() {
+         return nbUpdates;
+     }
+
+
+
+
 
     public void attachTo (BusController controller){
         this.busController = controller;
@@ -70,6 +50,10 @@ public final class Bus implements Clocked {
             currentRequest.decrementCyclesToExecute();
 
             if (currentRequest.done()) {
+              if(currentRequest.getBusEvent()==BusEvent.BusUpd)
+                  nbUpdates++;
+              else if(currentRequest.getBusEvent()==BusEvent.BusRdX)
+                  nbInvalidates++;
                 busController.alert();
             }
         }
@@ -79,26 +63,6 @@ public final class Bus implements Clocked {
     public void setCurrentRequest(Request request){
         this.currentRequest = request;
     }
-
-
-//     private void executeTransition(Request processingRequest) {
-//         boolean sharedSignal = askOthers(processingRequest.getSenderId(), processingRequest.getAddress());
-//         int blockSize = caches.get(processingRequest.getSenderId()).getBlockSize();
-//         switch (processingRequest.getBusEvent()) {
-//             case BusRdX:
-//                 if (sharedSignal) {
-//                     nbInvalidates++;
-//                 }
-//             case BusRd:
-//             case Flush:
-//                 busTraffic += blockSize;
-//                 break;
-//             case BusUpd:
-//                 busTraffic += Constants.BYTES_IN_WORD;
-//                 nbUpdates++;
-//                 break;
-//         }
-
 
 
 }

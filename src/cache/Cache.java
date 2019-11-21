@@ -24,6 +24,8 @@ public abstract class Cache implements Clocked {
     protected Bus bus;
     protected CacheState state;
     private Request request;
+    public static  int privateAccess=0;
+    public static int sharedAccess=0;
     public Cache(int id, int cacheSize, int blockSize, int associativity) {
 
         this.id=id;
@@ -59,9 +61,13 @@ public abstract class Cache implements Clocked {
     public abstract void ask(CacheInstruction instruction);
 
     public abstract boolean hasBlock(int address);
-    public void setRequest(Request request){
-        this.request=request;
+    public static int getPrivateAccess(){
+        return privateAccess;
     }
+    public static int getSharedAccess(){
+        return sharedAccess;
+    }
+
     public void linkBusController(BusController busController){
         this.busController=busController;
     }
@@ -104,7 +110,7 @@ public abstract class Cache implements Clocked {
     public abstract int getNbCacheMiss();
 
     public double getMissRate() {
-        double missRate = getNbCacheMiss() / getCpu().getInstructionCount();
+        double missRate = ((double)getNbCacheMiss()) / getCpu().getInstructionCount();
         return missRate * 100;
     }
 }

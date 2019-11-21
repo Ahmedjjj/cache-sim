@@ -101,6 +101,7 @@ public final class MesiCache extends Cache {
                     break;
             }
         }else{ //miss
+            cacheMiss++;
             int blockToEvacuate = lruQueues[line].blockToEvacuate();
             MesiCacheBlock evacuatedCacheBlock = cacheBlocks[line][blockToEvacuate];
 
@@ -161,22 +162,22 @@ protected int receiveMessage(Request request){
                     if (busEvent == BusEvent.BusRdX) {
                         cacheBlock.setMesiState(MesiState.INVALID);
                     }
-                    return Constants.BUS_WORD_LATENCY * blockSize;
+                    return blockSize/Constants.BUS_WORD_LATENCY;
                 case EXCLUSIVE:
                     if (busEvent == BusEvent.BusRd){
                         cacheBlock.setMesiState(MesiState.SHARED);
                     }else{
                         cacheBlock.setMesiState(MesiState.INVALID);
                     }
-                    return Constants.BUS_WORD_LATENCY * blockSize;
+                    return  blockSize/Constants.BUS_WORD_LATENCY;
                 case MODIFIED:
                     if (busEvent == BusEvent.BusRd) {
                         cacheBlock.setMesiState(MesiState.SHARED);
-                        return Constants.MEMORY_LATENCY + Constants.BUS_WORD_LATENCY * blockSize;
+                        return Constants.MEMORY_LATENCY +  blockSize/Constants.BUS_WORD_LATENCY;
 
                     } else if (busEvent == BusEvent.BusRdX) {
                         cacheBlock.setMesiState(MesiState.INVALID);
-                        return Constants.BUS_WORD_LATENCY * blockSize;
+                        return  blockSize/Constants.BUS_WORD_LATENCY;
                     }
                     break;
             }

@@ -20,7 +20,7 @@ public final class Request {
     }
 
     public boolean done(){
-        return this.cyclesToExecute == 0;
+        return this.cyclesToExecute <= 0;
     }
     public void setDataRequest(boolean dataRequest) {
         isDataRequest = dataRequest;

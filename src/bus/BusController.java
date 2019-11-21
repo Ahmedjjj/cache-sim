@@ -15,12 +15,14 @@ public final class BusController {
     private Request currentRequest;
     private Cache currentBusMaster;
     private final Queue<Cache> cacheQueue;
+    private int busTraffic;
 
     public BusController() {
         this.caches = new LinkedList<>();
         this.currentRequest = null;
         this.bus = bus;
         this.cacheQueue = new LinkedList<>();
+        busTraffic=0;
 
     }
 
@@ -38,11 +40,12 @@ public final class BusController {
         int extra_cycles = 0;
         for (Cache c : caches){
             int extra = c.notifyRequestAndGetExtraCycles(currentRequest);
-            if (extra != 0){
+            if (extra > 0){
                 extra_cycles = extra;
+                busTraffic+=extra;
             }
         }
-        if (extra_cycles != 0){
+        if (extra_cycles > 0){
             currentRequest.setCyclesToExecute(extra_cycles);
             currentRequest.setDataRequest(true);
         }else{
@@ -60,6 +63,10 @@ public final class BusController {
 boolean executing=false;
     public void queueUp (Cache cache){
         assert !cacheQueue.contains(cache);
+        int k;
+        if(cacheQueue.size()>4)
+           k = cacheQueue.size();
+           // throw new IllegalStateException();
         if (cacheQueue.isEmpty()&&currentRequest==null){
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
@@ -72,10 +79,14 @@ boolean executing=false;
     private void setNewRequest(){
         if (!cacheQueue.isEmpty()){
             Cache cache = cacheQueue.poll();
-            System.out.println(cache);
+           // System.out.println(cache);
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
             this.currentBusMaster = cache;
         }
+    }
+
+    public int getBusTraffic() {
+        return busTraffic;
     }
 }
