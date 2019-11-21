@@ -90,7 +90,6 @@ public final class Main {
         processors.forEach(p -> System.out.println("Number of Idle cycles for core " + processors.indexOf(p) + ": " + p.getTotalIdleCycles()));
         caches.forEach(c -> System.out.println("Cache miss rate for cache " + c.getId() + ": " + c.getMissRate()));
         caches.forEach(c -> System.out.println("Number of cache miss for cache " + c.getId() + ": " + c.getNbCacheMiss()));
-
         System.out.println("Data traffic on the bus in bytes: " + bus.getBusTraffic());
         System.out.println("Number of invalidations on the bus: " + bus.getNbInvalidates());
         System.out.println("Number of updates sent on the bus: " + bus.getNbUpdates());
