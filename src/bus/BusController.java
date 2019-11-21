@@ -52,7 +52,7 @@ public final class BusController {
         }else{
 
             Cache sender = caches.stream().filter(c -> c.getId() == currentRequest.getSenderId()).findFirst().get();
-            assert sender.getState() == CacheState.IDLE;
+            //assert sender.getState() == CacheState.IDLE;
             setNewRequest();
         }
     }
@@ -70,7 +70,11 @@ public final class BusController {
           //
         };
         System.out.println(cacheQueue);
-        assert !cacheQueue.contains(cache);
+        if (cacheQueue.contains(cache)){
+            System.err.println(cache.toString()+cacheQueue.toString());
+            assert false;
+        }
+        //assert !cacheQueue.contains(cache);
         if (cacheQueue.isEmpty()&&currentRequest==null){
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
@@ -88,8 +92,9 @@ public final class BusController {
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
             this.currentBusMaster = cache;
-        }else {
-            bus.setCurrentRequest(null);
+        }else{
+            this.currentRequest = null;
+            this.bus.setCurrentRequest(null);
         }
     }
 
