@@ -9,6 +9,7 @@ import common.Clocked;
 import cpu.Cpu;
 
 
+
 public abstract class Cache implements Clocked {
 
     protected int privateAccess;
