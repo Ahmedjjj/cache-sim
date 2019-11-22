@@ -5,9 +5,11 @@ import bus.BusController;
 import bus.Request;
 import cache.instruction.CacheInstruction;
 import cache.lru.LruQueue;
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import common.Clocked;
 import cpu.Cpu;
 
+import java.lang.invoke.ConstantCallSite;
 
 
 public abstract class Cache implements Clocked {
@@ -106,10 +108,10 @@ public abstract class Cache implements Clocked {
     public abstract boolean cacheHit(int address);
 
     protected int getTag(int address) {
-        return address / numLines;
+        return address / cacheSize;
     }
     protected int getLineNumber(int address) {
-        return address % numLines;
+        return (address % cacheSize) % (blockSize / 4);
     }
     public abstract int getNbCacheMiss();
 

@@ -18,7 +18,7 @@ public final class InstructionParser {
         Queue <Instruction> instructions = new LinkedList<>();
         int maxInstr= 800;
         try (Scanner scanner = new Scanner(new File(filePath))){
-            while(scanner.hasNextInt()){
+            while( scanner.hasNextInt()){
                 InstructionType type = InstructionType.values()[scanner.nextInt()];
                 int otherField = Integer.parseUnsignedInt(scanner.next().substring(2), HEX_RADIX);
                 Instruction instruction = new Instruction(type,otherField);

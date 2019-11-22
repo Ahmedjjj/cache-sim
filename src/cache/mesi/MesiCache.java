@@ -13,12 +13,13 @@ public final class MesiCache extends Cache {
 
     private final MesiCacheBlock[][] cacheBlocks;
 
+    private int numInstructions;
     private int cacheMiss;
+    private int memoryCycles;
 
     private int currentAddress;
     private CacheInstructionType currentType;
     private CacheInstruction currentInstruction;
-    private int memoryCycles;
     private MesiCacheBlock cacheBlockToEvacuate;
 
     public MesiCache(int id, int cacheSize, int blockSize, int associativity) {
@@ -48,29 +49,33 @@ public final class MesiCache extends Cache {
                 this.memoryCycles--;
                 if (memoryCycles == 0) {
                     cacheBlockToEvacuate.setMesiState(MesiState.INVALID);
-                    ask(new CacheInstruction(currentType, currentAddress));
+                    ask(currentInstruction);
                 }
                 break;
         }
     }
 
-int num =0;
     @Override
     public void ask(CacheInstruction instruction) {
-        if (currentInstruction!=instruction){
-            num++;
+
+        if (currentInstruction != instruction) {
+            numInstructions++;
+        } else {
+            getNumInstructions();
         }
 
         int address = instruction.getAddress();
         int line = getLineNumber(address);
         int tag = getTag(address);
+
         this.currentAddress = address;
         this.currentType = instruction.getCacheInstructionType();
+
         MesiCacheBlock cacheBlock = getBlock(address);
         boolean hit = cacheHit(address);
 
         if (hit) {
-
+            currentInstruction = instruction;
             int blockNumber = getBlockNumber(address);
             lruQueues[line].update(blockNumber);
             switch (cacheBlock.getMesiState()) {
@@ -89,8 +94,11 @@ int num =0;
                     break;
             }
         } else { //miss
-            if(instruction!=currentInstruction)
+            if (instruction != currentInstruction)
                 cacheMiss++;
+            else {
+                getNumInstructions();
+            }
             currentInstruction = instruction;
             int blockToEvacuate = lruQueues[line].blockToEvacuate();
             MesiCacheBlock evacuatedCacheBlock = cacheBlocks[line][blockToEvacuate];
@@ -127,7 +135,7 @@ int num =0;
 
     @Override
     protected int receiveMessage(Request request) {
-        assert request == this.request;
+
         if (this.state == CacheState.WAITING_FOR_BUS_DATA) {
             if (request.isDataRequest()) {
                 request.setSenderNeedsData(false);
@@ -145,7 +153,7 @@ int num =0;
 
     @Override
     protected int snoopTransition(Request request) {
-        assert request != this.request;
+
 
         MesiCacheBlock cacheBlock = getBlock(request.getAddress());
         BusEvent busEvent = request.getBusEvent();
@@ -213,7 +221,6 @@ int num =0;
 
         for (int i = 0; i < associativity; i++) {
             if ((cacheBlocks[lineNum][i].getTag() == tag)) {
-
                 return cacheBlocks[lineNum][i];
             }
         }
@@ -232,15 +239,15 @@ int num =0;
         return -1;
     }
 
-    public int getNum() {
-        return num;
+    public int getNumInstructions() {
+        return numInstructions;
     }
+
     public double getMissRate() {
-        double missRate = ((double)getNbCacheMiss()) /getNum();
+        double missRate = ((double) getNbCacheMiss()) / getNumInstructions();
         return missRate * 100;
     }
 
-    Request request;
     @Override
     public Request getRequest() {
 
@@ -251,16 +258,14 @@ int num =0;
             event = BusEvent.BusRdX;
         }
 
-        boolean senderNeedsData ;
+        boolean senderNeedsData;
         if (cacheHit(currentAddress)) {
-            //assert this.state == CacheState.WAITING_FOR_BUS_MESSAGE;
             senderNeedsData = false;
-        }else{
-            //assert this.state == CacheState.WAITING_FOR_BUS_DATA;
+        } else {
             senderNeedsData = true;
         }
-    request = new Request(id, event, currentAddress, Constants.BUS_MESSAGE_CYCLES, senderNeedsData);
-        return request;
+
+        return new Request(id, event, currentAddress, Constants.BUS_MESSAGE_CYCLES, senderNeedsData);
     }
 
     public String toString() {
