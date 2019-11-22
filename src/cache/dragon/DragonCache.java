@@ -53,7 +53,6 @@ public class DragonCache extends Cache {
         DragonCacheBlock cacheBlock = getCacheBlock(currentAddress);
         if (currentType == CacheInstructionType.READ) {
             if (cacheBlock.getState() == DragonState.NOT_IN_CACHE) {
-
                 cacheBlock.setState(sharedSignal ? DragonState.SC : DragonState.EXCLUSIVE);
             }
         } else {
@@ -65,7 +64,7 @@ public class DragonCache extends Cache {
 
     @Override
     protected int snoopTransition(Request request) {
-        DragonCacheBlock dragonCacheBlock = (DragonCacheBlock) this.getCacheBlock(request.getAddress());
+        DragonCacheBlock dragonCacheBlock = this.getCacheBlock(request.getAddress());
         BusEvent busEvent = request.getBusEvent();
         int address = request.getAddress();
         boolean sharedSignal = busController.checkExistenceInOtherCaches(this.id, address);
@@ -181,7 +180,9 @@ public class DragonCache extends Cache {
                 if (currentType == CacheInstructionType.WRITE) {
                     this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
                     busController.queueUp(this);
-                } else this.state = CacheState.WAITING_FOR_CACHE_HIT;
+                } else{
+                    this.state = CacheState.WAITING_FOR_CACHE_HIT;
+                }
             }
             break;
             case NOT_IN_CACHE: {//miss

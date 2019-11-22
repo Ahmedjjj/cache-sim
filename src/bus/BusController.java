@@ -57,8 +57,6 @@ public final class BusController {
 
     public void queueUp(Cache cache) {
 
-        assert !cacheQueue.contains(cache);
-
         if (cacheQueue.isEmpty() && currentRequest == null) {
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
