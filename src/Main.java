@@ -58,7 +58,7 @@ public final class Main {
 
         }
         runUntilEnd(processors, caches, bus);
-        printResults(processors, caches, bus);
+        printResults(processors, caches, bus, controller,protocol);
     }
 
     private static void runUntilEnd(List<Cpu> processors, List<Cache> caches, Bus bus) {
@@ -76,7 +76,7 @@ public final class Main {
         return processors.stream().allMatch(p -> p.finishedExecution());
     }
 
-    private static void printResults(List<Cpu> processors, List<Cache> caches, Bus bus) {
+    private static void printResults(List<Cpu> processors, List<Cache> caches, Bus bus, BusController controller ,Protocol protocol) {
         List<Long> executionCycle = new ArrayList<>(Constants.NUM_CPUS);
         processors.forEach(p -> executionCycle.add(p.getCycleCount()));
         long maxExecutionCycle = Collections.max(executionCycle);
@@ -89,10 +89,14 @@ public final class Main {
         processors.forEach(p -> System.out.println("Number of Idle cycles for core " + processors.indexOf(p) + ": " + p.getTotalIdleCycles()));
         caches.forEach(c -> System.out.println("Cache miss rate for cache " + c.getId() + ": " + c.getMissRate()));
         caches.forEach(c -> System.out.println("Number of cache miss for cache " + c.getId() + ": " + c.getNbCacheMiss()));
-        System.out.println("Data traffic on the bus in bytes: " + bus.getBusTraffic());
-        System.out.println("Number of invalidations on the bus: " + bus.getNbInvalidates());
-        System.out.println("Number of updates sent on the bus: " + bus.getNbUpdates());
-//        System.out.println("Number of accesses to private data: " + Cache.getPrivateAccess());
-//        System.out.println("Number of accesses to shared data: " + Cache.getSharedAccess());
+        System.out.println("Data traffic on the bus in bytes: " + controller.getBusTraffic());
+        System.out.println("Number of invalidations on the bus: " + getTotalNumOfInvalidations(caches));
+
+        //System.out.println("Number of accesses to private data: " + Cache.getPrivateAccess());
+        //System.out.println("Number of accesses to shared data: " + Cache.getSharedAccess());
     }
+    private static int getTotalNumOfInvalidations (List<Cache> caches){
+        return caches.stream().map(c -> c.getNbInvalidations()).reduce(0,(a,b)-> a + b );
+    }
+
 }

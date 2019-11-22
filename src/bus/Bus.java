@@ -5,29 +5,12 @@ import common.Clocked;
 
 public final class Bus implements Clocked {
 
-
-    private int nbUpdates;
-    private int nbInvalidates;
     private BusController busController;
     private Request currentRequest;
-
 
     public Bus() {
         this.currentRequest = null;
     }
-
-    public int getBusTraffic() {
-        return busController.getBusTraffic();
-    }
-
-    public int getNbInvalidates() {
-        return nbInvalidates;
-    }
-
-    public int getNbUpdates() {
-        return nbUpdates;
-    }
-
 
     public void attachTo(BusController controller) {
         this.busController = controller;
@@ -39,17 +22,11 @@ public final class Bus implements Clocked {
             currentRequest.decrementCyclesToExecute();
 
             if (currentRequest.done()) {
-                if (currentRequest.getBusEvent() == BusEvent.BusUpd) {
-                    nbUpdates++;
-                }
-                else if (currentRequest.getBusEvent() == BusEvent.BusRdX) {
-                    nbInvalidates++;
-                }
+
                 busController.alert();
             }
         }
     }
-
 
     public void setCurrentRequest(Request request) {
         this.currentRequest = request;
