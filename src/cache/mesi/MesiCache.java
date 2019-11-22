@@ -55,6 +55,7 @@ public final class MesiCache extends Cache {
         return numInstructions;
     }
 
+    @Override
     public String toString() {
         return "Cache " + id;
     }
@@ -64,8 +65,6 @@ public final class MesiCache extends Cache {
 
         if (currentInstruction != instruction) {
             numInstructions++;
-        } else {
-            getNumInstructions();
         }
 
         int address = instruction.getAddress();
@@ -98,10 +97,11 @@ public final class MesiCache extends Cache {
                     break;
             }
         } else { // miss
-            if (instruction != currentInstruction) cacheMiss++;
-            else {
-                getNumInstructions();
+
+            if (instruction != currentInstruction){
+                cacheMiss++;
             }
+
             currentInstruction = instruction;
             int blockToEvacuate = lruQueues[line].blockToEvacuate();
             MesiCacheBlock evacuatedCacheBlock = cacheBlocks[line][blockToEvacuate];
@@ -120,7 +120,7 @@ public final class MesiCache extends Cache {
         }
     }
 
-    public boolean hasBlock(int address) {
+    private boolean hasBlock(int address) {
         return cacheHit(address);
     }
 

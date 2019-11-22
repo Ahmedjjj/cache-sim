@@ -58,9 +58,6 @@ public final class BusController {
         }
     }
 DragonState statt;
-    public boolean checkExistenceInAllCaches (int address){
-        return caches.stream().anyMatch(c -> c.hasBlock(address));
-    }
 
     public boolean checkExistenceInOtherCaches(int senderId, int address) {
         return caches.stream().anyMatch(c -> c.getId()!=senderId && c.cacheHit(address));

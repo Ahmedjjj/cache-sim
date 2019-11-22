@@ -56,9 +56,6 @@ public abstract class Cache implements Clocked {
 
     }
 
-    public CacheState getState() {
-        return state;
-    }
 
     protected abstract int receiveMessage(Request request);
 
@@ -66,7 +63,7 @@ public abstract class Cache implements Clocked {
 
     public abstract void ask(CacheInstruction instruction);
 
-    public abstract boolean hasBlock(int address);
+
     public static int getPrivateAccess(){
         return privateAccess;
     }
@@ -80,21 +77,11 @@ public abstract class Cache implements Clocked {
     public Request getRequest(){
         return request;
     }
-    public boolean hasRequest(){
-        return request!=null;
-    }
 
     public int getId(){
         return id;
     }
 
-    public int getBlockSize() {
-        return blockSize;
-    }
-
-    public void linkBus(Bus bus){
-        this.bus = bus;
-    }
     public Bus getBus(){
         return bus;
     }
@@ -102,9 +89,7 @@ public abstract class Cache implements Clocked {
     public Cpu getCpu(){
         return cpu;
     }
-    public void wakeCpu(){
-        cpu.wake();
-    }
+
     public abstract boolean cacheHit(int address);
 
     protected int getTag(int address) {
