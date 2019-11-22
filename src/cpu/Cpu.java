@@ -12,18 +12,16 @@ import java.util.Queue;
 
 public final class Cpu implements Clocked {
 
-    private final Cache cache;
-
     private Queue<Instruction> instructions;
     private CpuState state;
     private long cycleCount;
     private int instructionCount;
     private int executingCyclesLeft;
-
     private int totalComputingCycles;
     private int totalIdleCycles;
     private int numLoad;
     private int numStore;
+    private final Cache cache;
 
     public Cpu(Cache cache) {
 
@@ -37,22 +35,20 @@ public final class Cpu implements Clocked {
         totalComputingCycles = 0;
         totalIdleCycles = 0;
         numLoad = 0;
-        numStore=0;
+        numStore = 0;
 
     }
 
     public void runForOneCycle() {
-        if(cycleCount%10000==0){
-            state=state;
-        }
 
         switch (state) {
             case IDLE:
                 Instruction instruction = instructions.poll();
                 if (instruction != null) {
                     executeInstruction(instruction);
-                    if(instruction.getType()== InstructionType.READ||instruction.getType()== InstructionType.WRITE)
-                    instructionCount++;
+                    if (instruction.getType() == InstructionType.READ || instruction.getType() == InstructionType.WRITE) {
+                        instructionCount++;
+                    }
                 }
                 break;
             case BLOCKING:
@@ -64,8 +60,45 @@ public final class Cpu implements Clocked {
                     setState(CpuState.IDLE);
                 }
         }
-        if(!finishedExecution())
-        cycleCount++;
+        if (!finishedExecution())
+            cycleCount++;
+    }
+
+    public void setInstructions(Queue<Instruction> instructions) {
+        this.instructions = new LinkedList<>(instructions);
+    }
+
+    public void wake() {
+        assert (this.state == CpuState.BLOCKING);
+        setState(CpuState.IDLE);
+    }
+
+    public long getCycleCount() {
+        return cycleCount;
+    }
+
+    public int getInstructionCount() {
+        return instructionCount;
+    }
+
+    public int getTotalComputingCycles() {
+        return totalComputingCycles;
+    }
+
+    public int getTotalIdleCycles() {
+        return totalIdleCycles;
+    }
+
+    public int getNumLoad() {
+        return numLoad;
+    }
+
+    public int getNumStore() {
+        return numStore;
+    }
+
+    public boolean finishedExecution() {
+        return this.instructions.isEmpty() && this.state == CpuState.IDLE;
     }
 
     private void executeInstruction(Instruction instruction) {
@@ -93,42 +126,6 @@ public final class Cpu implements Clocked {
                 break;
             }
         }
-    }
-
-    public void setInstructions(Queue<Instruction> instructions) {
-        this.instructions = new LinkedList<>(instructions);
-    }
-
-
-    public void wake() {
-        assert (this.state == CpuState.BLOCKING);
-        setState(CpuState.IDLE);
-    }
-
-    public long getCycleCount() {
-        return cycleCount;
-    }
-    public int getInstructionCount(){
-        return instructionCount;
-    }
-
-    public int getTotalComputingCycles() {
-        return totalComputingCycles;
-    }
-
-    public int getTotalIdleCycles() {
-        return totalIdleCycles;
-    }
-
-    public int getNumLoad() {
-        return numLoad;
-    }
-    public int getNumStore(){
-        return numStore;
-    }
-
-    public boolean finishedExecution() {
-        return this.instructions.isEmpty() && this.state == CpuState.IDLE;
     }
 
     private void setState(CpuState state) {

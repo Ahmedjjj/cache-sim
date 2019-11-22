@@ -120,10 +120,6 @@ public final class MesiCache extends Cache {
         }
     }
 
-    private boolean hasBlock(int address) {
-        return cacheHit(address);
-    }
-
     @Override
     public Request getRequest() {
 
