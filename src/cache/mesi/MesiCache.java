@@ -78,9 +78,11 @@ public final class MesiCache extends Cache {
             switch (cacheBlock.getMesiState()) {
                 case EXCLUSIVE:
                 case MODIFIED:
+                    privateAccess++;
                     this.state = CacheState.WAITING_FOR_CACHE_HIT;
                     break;
                 case SHARED:
+                    sharedAccess++;
                     if (instruction.getCacheInstructionType() == CacheInstructionType.WRITE) {
                         this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
                         this.busController.queueUp(this);
@@ -95,7 +97,6 @@ public final class MesiCache extends Cache {
             if (instruction != currentInstruction) {
                 cacheMiss++;
             }
-
             currentInstruction = instruction;
             int blockToEvacuate = lruQueues[line].blockToEvacuate();
             MesiCacheBlock evacuatedCacheBlock = cacheBlocks[line][blockToEvacuate];
