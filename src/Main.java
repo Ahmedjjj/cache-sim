@@ -44,7 +44,7 @@ public final class Main {
         File[] files = dir.listFiles();
 
 
-        for (int i = 0; i <Constants.NUM_CPUS; i++) {
+        for (int i = 0; i <4; i++) {
             Cache cache = protocol == Protocol.MESI ?
                     new MesiCache(i, cacheSize, blockSize, associativity) :
                     new DragonCache(i, cacheSize, blockSize, associativity);
