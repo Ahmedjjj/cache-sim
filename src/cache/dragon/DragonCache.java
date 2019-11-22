@@ -1,4 +1,4 @@
-package dragon;
+package cache.dragon;
 
 import bus.BusEvent;
 import bus.Request;
@@ -9,12 +9,12 @@ import cache.instruction.CacheInstructionType;
 import common.Constants;
 
 public class DragonCache extends Cache {
+
     private DragonCacheBlock[][] dragonCacheBlocks;
     private int cacheMiss;
     private int memoryCycles;
     private DragonCacheBlock cacheBlockToEvacuate;
     private int currentAddress;
-
 
     private CacheInstructionType currentType;
 
@@ -77,27 +77,27 @@ public class DragonCache extends Cache {
             case EXCLUSIVE:
                 //privateAccess++;
                 dragonCacheBlock.setState(DragonState.SC);
-                bytesSend = blockSize / Constants.BUS_WORD_LATENCY;// any request for access
+                bytesSend = (blockSize / Constants.BYTES_IN_WORD) * Constants.BUS_WORD_LATENCY;// any request for access
                 if (busEvent == BusEvent.BusUpd) {
-                    bytesSend += Constants.BUS_WORD_LATENCY; // assuming it has sent the block, and gets the update
+                    bytesSend += Constants.BUS_UPD_LATENCY; // assuming it has sent the block, and gets the update
                 }
                 return bytesSend;
             case SM:
                 //sharedAccess++;
                 if (busEvent == BusEvent.BusUpd) {
                     dragonCacheBlock.setState(DragonState.SC);
-                    return Constants.BUS_WORD_LATENCY; // only gets the update
+                    return Constants.BUS_UPD_LATENCY; // only gets the update
                 }
                 if (busEvent == BusEvent.BusRd) {
                     //stays in sm
-                    return blockSize / Constants.BUS_WORD_LATENCY; //sends the whole block to the requesting cache
+                    return (blockSize / Constants.BYTES_IN_WORD) * Constants.BUS_WORD_LATENCY; //sends the whole block to the requesting cache
                 }
                 break;
             case SC:
                 if (busEvent == BusEvent.BusRd) {
-                    return blockSize / Constants.BUS_WORD_LATENCY;// it sends the data on the bus
+                    return (blockSize / Constants.BYTES_IN_WORD) * Constants.BUS_WORD_LATENCY;// it sends the data on the bus
                 } else
-                    return Constants.BUS_WORD_LATENCY; // accounting for the data recieved for the update
+                    return Constants.BUS_UPD_LATENCY; // accounting for the data recieved for the update
 
             case MODIFIED:
                 // privateAccess++;
@@ -106,7 +106,7 @@ public class DragonCache extends Cache {
                     return Constants.MEMORY_LATENCY; //needs to flush
                 } else { // someone is writing to this block
                     dragonCacheBlock.setState(DragonState.SC);
-                    return Constants.MEMORY_LATENCY + Constants.BUS_WORD_LATENCY;
+                    return Constants.MEMORY_LATENCY + Constants.BUS_UPD_LATENCY;
                     //must  writeback + get the update
                 }
         }
@@ -226,6 +226,7 @@ public class DragonCache extends Cache {
         if (currentType == CacheInstructionType.READ) {
             event = BusEvent.BusRd;
         } else {
+            nbInvalidations++;
             event = BusEvent.BusUpd;
         }
         boolean senderNeedsData = !cacheHit(currentAddress);

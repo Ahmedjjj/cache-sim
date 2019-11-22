@@ -5,7 +5,7 @@ import cache.Protocol;
 import cache.mesi.MesiCache;
 import common.Constants;
 import cpu.Cpu;
-import dragon.DragonCache;
+import cache.dragon.DragonCache;
 import instruction.Instruction;
 import instruction.InstructionParser;
 

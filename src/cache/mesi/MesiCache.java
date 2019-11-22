@@ -10,7 +10,7 @@ import common.Constants;
 
 public final class MesiCache extends Cache {
 
-    private int numInstructions;
+
     private int cacheMiss;
     private int memoryCycles;
     private int currentAddress;
@@ -51,9 +51,7 @@ public final class MesiCache extends Cache {
         }
     }
 
-    public int getNumInstructions() {
-        return numInstructions;
-    }
+
 
     @Override
     public String toString() {
@@ -62,10 +60,6 @@ public final class MesiCache extends Cache {
 
     @Override
     public void ask(CacheInstruction instruction) {
-
-        if (currentInstruction != instruction) {
-            numInstructions++;
-        }
 
         int address = instruction.getAddress();
         int line = getLineNumber(address);
@@ -127,6 +121,7 @@ public final class MesiCache extends Cache {
         if (currentType == CacheInstructionType.READ) {
             event = BusEvent.BusRd;
         } else {
+            nbInvalidations++;
             event = BusEvent.BusRdX;
         }
 
@@ -143,11 +138,6 @@ public final class MesiCache extends Cache {
 
     public int getNbCacheMiss() {
         return cacheMiss;
-    }
-
-    public double getMissRate() {
-        double missRate = ((double) getNbCacheMiss()) / getNumInstructions();
-        return missRate * 100;
     }
 
     @Override

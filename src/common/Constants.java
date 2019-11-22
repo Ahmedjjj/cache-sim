@@ -8,4 +8,5 @@ public interface Constants {
     int NUM_CPUS = 4;
     int BUS_MESSAGE_CYCLES = 1;
     int BYTES_IN_WORD = 4;
+    int BUS_UPD_LATENCY = 2;
 }
