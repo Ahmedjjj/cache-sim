@@ -35,6 +35,7 @@ public class DragonCache extends Cache {
     protected int receiveMessage(Request request) {
         if (this.state == CacheState.WAITING_FOR_BUS_DATA) {
             if (request.isDataRequest()) {
+                request.setSenderNeedsData(false);
                 busTransactionOver();
             } else if (!busController.checkExistenceInOtherCaches(id, request.getAddress())) {
                 this.state = CacheState.WAITING_FOR_BUS_DATA;
@@ -53,6 +54,7 @@ public class DragonCache extends Cache {
         DragonCacheBlock cacheBlock = getCacheBlock(currentAddress);
         if (currentType == CacheInstructionType.READ) {
             if (cacheBlock.getState() == DragonState.NOT_IN_CACHE) {
+
                 cacheBlock.setState(sharedSignal ? DragonState.SC : DragonState.EXCLUSIVE);
             }
         } else {
@@ -73,12 +75,9 @@ public class DragonCache extends Cache {
         switch (dragonCacheBlock.getState()) {
             //shouldn't be null since it's this cache that generated the request for it
             case EXCLUSIVE:
-                if (busEvent == BusEvent.BusRd) {
                     privateAccess++;
                     dragonCacheBlock.setState(DragonState.SC);
                     return blockSize / Constants.BUS_WORD_LATENCY;
-                }
-                break;
             case SM:
                 sharedAccess++;
                 if (busEvent == BusEvent.BusUpd) {
@@ -87,13 +86,13 @@ public class DragonCache extends Cache {
                 }
                 if (busEvent == BusEvent.BusRd) {
                     //stays in sm, maybe not flush memory, just send the data on the bus
-                    return blockSize / Constants.BUS_WORD_LATENCY; //?? isnt it
+                    return blockSize / Constants.BUS_WORD_LATENCY;
                 }
                 break;
             case SC:
                 if (busEvent == BusEvent.BusRd) {
                     //stays in sm, maybe not flush memory, just send the data on the bus
-                    return blockSize / Constants.BUS_WORD_LATENCY; //?? isnt it
+                    return blockSize / Constants.BUS_WORD_LATENCY;
                 }
                 break;
             case MODIFIED:
@@ -101,8 +100,12 @@ public class DragonCache extends Cache {
                     privateAccess++;
                     dragonCacheBlock.setState(DragonState.SM);
                     return Constants.MEMORY_LATENCY+blockSize / Constants.BUS_WORD_LATENCY;
+                }else {
+                    privateAccess++;
+                    dragonCacheBlock.setState(DragonState.SC);
+                    return blockSize / Constants.BUS_WORD_LATENCY;
+
                 }
-                break;
 
         }
         return 0;
@@ -130,7 +133,7 @@ public class DragonCache extends Cache {
     }
 
 
-    private DragonState getBlockState(int address) {
+    public DragonState getBlockState(int address) {
         DragonCacheBlock cacheBlock = getCacheBlock(address);
         return cacheBlock == null ? DragonState.NOT_IN_CACHE : cacheBlock.getState();
     }
@@ -146,15 +149,21 @@ public class DragonCache extends Cache {
         }
         return null;
     }
-
+    int num =0;
+    int cacheHit=0;
+    CacheInstruction currentInstruction;
     @Override
     public void ask(CacheInstruction instruction) {
+        if (currentInstruction!=instruction){
+        num++;
+    }
         this.currentAddress = instruction.getAddress();
         DragonState state = getBlockState(currentAddress);
         this.currentType = instruction.getCacheInstructionType();
         int line = getLineNumber(currentAddress);
         int tag = getTag(currentAddress);
         switch (state) {
+
             case EXCLUSIVE:
 
             case MODIFIED:
@@ -164,13 +173,14 @@ public class DragonCache extends Cache {
             case SM:
             case SC: {
                 if (currentType == CacheInstructionType.WRITE) {
-                    busController.queueUp(this);
                     this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
+                    busController.queueUp(this);
                 } else this.state = CacheState.WAITING_FOR_CACHE_HIT;
-            }
-            break;
+            }break;
             case NOT_IN_CACHE: {//miss
-                cacheMiss++;
+                if(instruction!=currentInstruction)
+                    cacheMiss++;
+                currentInstruction = instruction;
                 int blockToEvacuate = lruQueues[line].blockToEvacuate();
                 DragonCacheBlock evacuatedCacheBlock = dragonCacheBlocks[line][blockToEvacuate];
                 if (evacuatedCacheBlock.getState() == DragonState.MODIFIED) {
@@ -181,8 +191,8 @@ public class DragonCache extends Cache {
                     lruQueues[line].evacuate();
                     evacuatedCacheBlock.setState(DragonState.NOT_IN_CACHE);
                     evacuatedCacheBlock.setTag(tag);
-                    this.busController.queueUp(this);
                     this.state = CacheState.WAITING_FOR_BUS_DATA;
+                    this.busController.queueUp(this);
                 }
             }
             break;
@@ -205,7 +215,10 @@ public String toString(){
         return false;
     }
 
-
+    public double getMissRate() {
+        double missRate = ((double)getNbCacheMiss()) /num;
+        return missRate * 100;
+    }
     public int getNbCacheMiss() {
         return cacheMiss;
     }
@@ -218,16 +231,7 @@ public String toString(){
         } else {
             event = BusEvent.BusUpd;
         }
-        boolean senderNeedsData ;
-        if (cacheHit(currentAddress)) {
-             this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
-
-            senderNeedsData = false;
-        }else{
-             this.state = CacheState.WAITING_FOR_BUS_DATA;
-            senderNeedsData = true;
-        }
-        //this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
+        boolean senderNeedsData = !cacheHit(currentAddress);
         return new Request(id, event, currentAddress, Constants.BUS_MESSAGE_CYCLES, senderNeedsData);
     }
 

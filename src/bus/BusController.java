@@ -4,6 +4,8 @@ package bus;
 import cache.Cache;
 import cache.CacheState;
 import common.Constants;
+import dragon.DragonCache;
+import dragon.DragonState;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -51,12 +53,11 @@ public final class BusController {
             currentRequest.setDataRequest(true);
         }else{
 
-            Cache sender = caches.stream().filter(c -> c.getId() == currentRequest.getSenderId()).findFirst().get();
-            assert sender.getState() == CacheState.IDLE;
+           // Cache sender = caches.stream().filter(c -> c.getId() == currentRequest.getSenderId()).findFirst().get();
             setNewRequest();
         }
     }
-
+DragonState statt;
     public boolean checkExistenceInAllCaches (int address){
         return caches.stream().anyMatch(c -> c.hasBlock(address));
     }
@@ -70,7 +71,7 @@ public final class BusController {
           //
         };
         //System.out.println(cacheQueue);
-        assert !cacheQueue.contains(cache);
+        //assert !cacheQueue.contains(cache);
         if (cacheQueue.isEmpty()&&currentRequest==null){
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
