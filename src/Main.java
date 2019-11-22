@@ -44,7 +44,7 @@ public final class Main {
         File[] files = dir.listFiles();
 
 
-        for (int i = 0; i <4; i++) {
+        for (int i = 0; i < 4; i++) {
             Cache cache = protocol == Protocol.MESI ?
                     new MesiCache(i, cacheSize, blockSize, associativity) :
                     new DragonCache(i, cacheSize, blockSize, associativity);
@@ -57,20 +57,18 @@ public final class Main {
             controller.attach(cache);
 
         }
-
         runUntilEnd(processors, caches, bus);
         printResults(processors, caches, bus);
     }
 
     private static void runUntilEnd(List<Cpu> processors, List<Cache> caches, Bus bus) {
-        int maxcycles = 3000000;
-        //while (maxcycles!=0&&
+
         while (!allFinished(processors)) {
             bus.runForOneCycle();
             caches.forEach(c -> c.runForOneCycle());
             Collections.shuffle(processors);
             processors.forEach(p -> p.runForOneCycle());
-            // maxcycles--;
+
         }
     }
 
@@ -94,7 +92,7 @@ public final class Main {
         System.out.println("Data traffic on the bus in bytes: " + bus.getBusTraffic());
         System.out.println("Number of invalidations on the bus: " + bus.getNbInvalidates());
         System.out.println("Number of updates sent on the bus: " + bus.getNbUpdates());
-        System.out.println("Number of accesses to private data: " + Cache.getPrivateAccess());
-        System.out.println("Number of accesses to shared data: " + Cache.getSharedAccess());
+//        System.out.println("Number of accesses to private data: " + Cache.getPrivateAccess());
+//        System.out.println("Number of accesses to shared data: " + Cache.getSharedAccess());
     }
 }

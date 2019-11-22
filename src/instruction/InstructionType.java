@@ -1,5 +1,5 @@
 package instruction;
 
 public enum InstructionType {
-    READ , WRITE , OTHER
+    READ, WRITE, OTHER
 }

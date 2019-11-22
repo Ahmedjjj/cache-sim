@@ -1,5 +1,5 @@
 package cache.mesi;
 
 public enum MesiState {
-    MODIFIED,EXCLUSIVE,SHARED,INVALID
+    MODIFIED, EXCLUSIVE, SHARED, INVALID
 }

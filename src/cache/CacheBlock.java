@@ -1,16 +1,12 @@
 package cache;
 
-import bus.BusEvent;
-
 public abstract class CacheBlock {
 
-    private final int size;
-
     private int tag;
+    private final int size;
 
     public CacheBlock(int size) {
         this.size = size;
-
     }
 
     public int getTag() {
@@ -20,7 +16,5 @@ public abstract class CacheBlock {
     public void setTag(int tag) {
         this.tag = tag;
     }
-
-    public abstract void update(BusEvent busEvent);
 
 }

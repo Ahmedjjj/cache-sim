@@ -103,7 +103,7 @@ public class DragonCache extends Cache {
                 // privateAccess++;
                 if (busEvent == BusEvent.BusRd) {
                     dragonCacheBlock.setState(DragonState.SM);
-                    return Constants.MEMORY_LATENCY ; //needs to flush
+                    return Constants.MEMORY_LATENCY; //needs to flush
                 } else { // someone is writing to this block
                     dragonCacheBlock.setState(DragonState.SC);
                     return Constants.MEMORY_LATENCY + Constants.BUS_WORD_LATENCY;
@@ -176,7 +176,7 @@ public class DragonCache extends Cache {
                 break;
             case SM:
             case SC: {
-                if(state==DragonState.SM)
+                if (state == DragonState.SM)
                     sharedAccess++;
                 if (currentType == CacheInstructionType.WRITE) {
                     this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
@@ -216,17 +216,6 @@ public class DragonCache extends Cache {
         return "Dragon " + id;
     }
 
-
-    @Override
-    public boolean hasBlock(int address) {
-        return false;
-    }
-
-    public double getMissRate() {
-        double missRate = ((double) getNbCacheMiss()) / num;
-        return missRate * 100;
-    }
-
     public int getNbCacheMiss() {
         return cacheMiss;
     }
@@ -244,3 +233,4 @@ public class DragonCache extends Cache {
     }
 
 }
+

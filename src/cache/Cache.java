@@ -12,6 +12,12 @@ import cpu.Cpu;
 
 public abstract class Cache implements Clocked {
 
+    protected int privateAccess;
+    protected int sharedAccess;
+    protected Cpu cpu;
+    protected BusController busController;
+    protected Bus bus;
+    protected CacheState state;
     protected final int cacheSize;
     protected final int blockSize;
     protected final LruQueue[] lruQueues;
@@ -19,16 +25,9 @@ public abstract class Cache implements Clocked {
     protected final int associativity;
     protected final int id;
 
-    protected Cpu cpu;
-    protected BusController busController;
-    protected Bus bus;
-    protected CacheState state;
-    private Request request;
-    public static  int privateAccess=0;
-    public static int sharedAccess=0;
     public Cache(int id, int cacheSize, int blockSize, int associativity) {
 
-        this.id=id;
+        this.id = id;
         this.cacheSize = cacheSize;
         this.blockSize = blockSize;
         this.associativity = associativity;
@@ -39,82 +38,64 @@ public abstract class Cache implements Clocked {
             lruQueues[i] = new LruQueue(associativity);
         }
     }
-    public void linkCpu(Cpu cpu){
+
+    public void linkCpu(Cpu cpu) {
         this.cpu = cpu;
     }
 
     public int notifyRequestAndGetExtraCycles(Request request) {
         boolean isOriginalSender = request.getSenderId() == this.id;
 
-        if (!isOriginalSender){
+        if (!isOriginalSender) {
             return snoopTransition(request);
-        }else{
+        } else {
             return receiveMessage(request);
         }
 
     }
 
-    public CacheState getState() {
-        return state;
+    public abstract void ask(CacheInstruction instruction);
+
+    public int getPrivateAccess() {
+        return privateAccess;
+    }
+
+    public int getSharedAccess() {
+        return sharedAccess;
+    }
+
+    public void linkBusController(BusController busController) {
+        this.busController = busController;
+    }
+
+    public abstract Request getRequest();
+
+    public int getId() {
+        return id;
+    }
+
+    public Cpu getCpu() {
+        return cpu;
+    }
+
+    public abstract boolean cacheHit(int address);
+
+    public abstract int getNbCacheMiss();
+
+    public double getMissRate() {
+        double missRate = ((double) getNbCacheMiss()) / getCpu().getCacheInstructionCount();
+        return missRate * 100;
     }
 
     protected abstract int receiveMessage(Request request);
 
     protected abstract int snoopTransition(Request request);
 
-    public abstract void ask(CacheInstruction instruction);
-
-    public abstract boolean hasBlock(int address);
-    public static int getPrivateAccess(){
-        return privateAccess;
-    }
-    public static int getSharedAccess(){
-        return sharedAccess;
-    }
-
-    public void linkBusController(BusController busController){
-        this.busController=busController;
-    }
-    public Request getRequest(){
-        return request;
-    }
-    public boolean hasRequest(){
-        return request!=null;
-    }
-
-    public int getId(){
-        return id;
-    }
-
-    public int getBlockSize() {
-        return blockSize;
-    }
-
-    public void linkBus(Bus bus){
-        this.bus = bus;
-    }
-    public Bus getBus(){
-        return bus;
-    }
-
-    public Cpu getCpu(){
-        return cpu;
-    }
-    public void wakeCpu(){
-        cpu.wake();
-    }
-    public abstract boolean cacheHit(int address);
-
     protected int getTag(int address) {
         return address / cacheSize;
     }
+
     protected int getLineNumber(int address) {
         return (address % cacheSize) % (blockSize / 4);
-    }
-    public abstract int getNbCacheMiss();
-
-    public double getMissRate() {
-        double missRate = ((double)getNbCacheMiss()) / getCpu().getInstructionCount();
-        return missRate * 100;
     }
 }

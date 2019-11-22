@@ -1,9 +1,6 @@
 package cache.instruction;
 
-import instruction.Instruction;
-import instruction.InstructionType;
-
-public final class CacheInstruction  {
+public final class CacheInstruction {
 
     private final int address;
     private final CacheInstructionType cacheInstructionType;
