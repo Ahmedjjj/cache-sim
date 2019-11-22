@@ -43,9 +43,9 @@ public final class BusController {
             int extra = c.notifyRequestAndGetExtraCycles(currentRequest);
             if (extra > 0) {
                 extra_cycles = extra;
-                busTraffic += extra;
             }
         }
+
         if (extra_cycles > 0 && currentRequest.senderNeedsData()) {
             currentRequest.setCyclesToExecute(extra_cycles);
             currentRequest.setDataRequest(true);
