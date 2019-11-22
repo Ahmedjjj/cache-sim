@@ -16,7 +16,6 @@ public class DragonCache extends Cache {
     private int currentAddress;
 
 
-
     private CacheInstructionType currentType;
 
     public DragonCache(int id, int cacheSize, int blockSize, int associativity) {
@@ -27,88 +26,8 @@ public class DragonCache extends Cache {
                 dragonCacheBlocks[i][j] = new DragonCacheBlock(blockSize);
             }
         }
-        cacheMiss=0;
+        cacheMiss = 0;
         memoryCycles = 0;
-    }
-
-    @Override
-    protected int receiveMessage(Request request) {
-        if (this.state == CacheState.WAITING_FOR_BUS_DATA) {
-            if (request.isDataRequest()) {
-                request.setSenderNeedsData(false);
-                busTransactionOver();
-            } else if (!busController.checkExistenceInOtherCaches(id, request.getAddress())) {
-                this.state = CacheState.WAITING_FOR_BUS_DATA;
-                return Constants.MEMORY_LATENCY;
-            }
-        } else if (this.state == CacheState.WAITING_FOR_BUS_MESSAGE) {
-            busTransactionOver();
-        }
-
-        return 0;
-    }
-
-
-    private void busTransactionOver() {
-        boolean sharedSignal = (busController.checkExistenceInOtherCaches(this.id, currentAddress));
-        DragonCacheBlock cacheBlock = getCacheBlock(currentAddress);
-        if (currentType == CacheInstructionType.READ) {
-            if (cacheBlock.getState() == DragonState.NOT_IN_CACHE) {
-
-                cacheBlock.setState(sharedSignal ? DragonState.SC : DragonState.EXCLUSIVE);
-            }
-        } else {
-            cacheBlock.setState(sharedSignal ? DragonState.SM : DragonState.MODIFIED);
-        }
-        this.state = CacheState.IDLE;
-        this.cpu.wake();
-    }
-
-    @Override
-    protected int snoopTransition(Request request) {
-        DragonCacheBlock dragonCacheBlock = (DragonCacheBlock) this.getCacheBlock(request.getAddress());
-        BusEvent busEvent = request.getBusEvent();
-        int address = request.getAddress();
-        boolean sharedSignal = busController.checkExistenceInOtherCaches(this.id, address);
-        if (dragonCacheBlock == null)
-            return 0;
-        switch (dragonCacheBlock.getState()) {
-            //shouldn't be null since it's this cache that generated the request for it
-            case EXCLUSIVE:
-                    privateAccess++;
-                    dragonCacheBlock.setState(DragonState.SC);
-                    return blockSize / Constants.BUS_WORD_LATENCY;
-            case SM:
-                sharedAccess++;
-                if (busEvent == BusEvent.BusUpd) {
-                    dragonCacheBlock.setState(DragonState.SC);
-                    return Constants.BUS_WORD_LATENCY;
-                }
-                if (busEvent == BusEvent.BusRd) {
-                    //stays in sm, maybe not flush memory, just send the data on the bus
-                    return blockSize / Constants.BUS_WORD_LATENCY;
-                }
-                break;
-            case SC:
-                if (busEvent == BusEvent.BusRd) {
-                    //stays in sm, maybe not flush memory, just send the data on the bus
-                    return blockSize / Constants.BUS_WORD_LATENCY;
-                }
-                break;
-            case MODIFIED:
-                if (busEvent == BusEvent.BusRd) {
-                    privateAccess++;
-                    dragonCacheBlock.setState(DragonState.SM);
-                    return Constants.MEMORY_LATENCY+blockSize / Constants.BUS_WORD_LATENCY;
-                }else {
-                    privateAccess++;
-                    dragonCacheBlock.setState(DragonState.SC);
-                    return blockSize / Constants.BUS_WORD_LATENCY;
-
-                }
-
-        }
-        return 0;
     }
 
     @Override
@@ -132,31 +51,16 @@ public class DragonCache extends Cache {
         }
     }
 
-
     public DragonState getBlockState(int address) {
         DragonCacheBlock cacheBlock = getCacheBlock(address);
         return cacheBlock == null ? DragonState.NOT_IN_CACHE : cacheBlock.getState();
     }
 
-    protected DragonCacheBlock getCacheBlock(int address) {
-        int tag = super.getTag(address);
-        int lineNum = super.getLineNumber(address);
-
-        for (int i = 0; i < associativity; i++) {
-            if ((dragonCacheBlocks[lineNum][i].getTag() == tag)) {
-                return dragonCacheBlocks[lineNum][i];
-            }
-        }
-        return null;
-    }
-    int num =0;
-    int cacheHit=0;
-    CacheInstruction currentInstruction;
     @Override
     public void ask(CacheInstruction instruction) {
-        if (currentInstruction!=instruction){
-        num++;
-    }
+        if (currentInstruction != instruction) {
+            num++;
+        }
         this.currentAddress = instruction.getAddress();
         DragonState state = getBlockState(currentAddress);
         this.currentType = instruction.getCacheInstructionType();
@@ -176,9 +80,10 @@ public class DragonCache extends Cache {
                     this.state = CacheState.WAITING_FOR_BUS_MESSAGE;
                     busController.queueUp(this);
                 } else this.state = CacheState.WAITING_FOR_CACHE_HIT;
-            }break;
+            }
+            break;
             case NOT_IN_CACHE: {//miss
-                if(instruction!=currentInstruction)
+                if (instruction != currentInstruction)
                     cacheMiss++;
                 currentInstruction = instruction;
                 int blockToEvacuate = lruQueues[line].blockToEvacuate();
@@ -205,20 +110,15 @@ public class DragonCache extends Cache {
         return getBlockState(address) != DragonState.NOT_IN_CACHE;
     }
 
-public String toString(){
-        return "Dragon "+id;
-}
-
-
-    @Override
-    public boolean hasBlock(int address) {
-        return false;
+    public String toString() {
+        return "Dragon " + id;
     }
 
     public double getMissRate() {
-        double missRate = ((double)getNbCacheMiss()) /num;
+        double missRate = ((double) getNbCacheMiss()) / num;
         return missRate * 100;
     }
+
     public int getNbCacheMiss() {
         return cacheMiss;
     }
@@ -234,6 +134,100 @@ public String toString(){
         boolean senderNeedsData = !cacheHit(currentAddress);
         return new Request(id, event, currentAddress, Constants.BUS_MESSAGE_CYCLES, senderNeedsData);
     }
+
+    @Override
+    protected int receiveMessage(Request request) {
+        if (this.state == CacheState.WAITING_FOR_BUS_DATA) {
+            if (request.isDataRequest()) {
+                request.setSenderNeedsData(false);
+                busTransactionOver();
+            } else if (!busController.checkExistenceInOtherCaches(id, request.getAddress())) {
+                this.state = CacheState.WAITING_FOR_BUS_DATA;
+                return Constants.MEMORY_LATENCY;
+            }
+        } else if (this.state == CacheState.WAITING_FOR_BUS_MESSAGE) {
+            busTransactionOver();
+        }
+
+        return 0;
+    }
+
+    @Override
+    protected int snoopTransition(Request request) {
+        DragonCacheBlock dragonCacheBlock = this.getCacheBlock(request.getAddress());
+        BusEvent busEvent = request.getBusEvent();
+        int address = request.getAddress();
+        boolean sharedSignal = busController.checkExistenceInOtherCaches(this.id, address);
+        if (dragonCacheBlock == null)
+            return 0;
+        switch (dragonCacheBlock.getState()) {
+            //shouldn't be null since it's this cache that generated the request for it
+            case EXCLUSIVE:
+                privateAccess++;
+                dragonCacheBlock.setState(DragonState.SC);
+                return blockSize / Constants.BUS_WORD_LATENCY;
+            case SM:
+                sharedAccess++;
+                if (busEvent == BusEvent.BusUpd) {
+                    dragonCacheBlock.setState(DragonState.SC);
+                    return Constants.BUS_WORD_LATENCY;
+                }
+                if (busEvent == BusEvent.BusRd) {
+                    //stays in sm, maybe not flush memory, just send the data on the bus
+                    return blockSize / Constants.BUS_WORD_LATENCY;
+                }
+                break;
+            case SC:
+                if (busEvent == BusEvent.BusRd) {
+                    //stays in sm, maybe not flush memory, just send the data on the bus
+                    return blockSize / Constants.BUS_WORD_LATENCY;
+                }
+                break;
+            case MODIFIED:
+                if (busEvent == BusEvent.BusRd) {
+                    privateAccess++;
+                    dragonCacheBlock.setState(DragonState.SM);
+                    return Constants.MEMORY_LATENCY + blockSize / Constants.BUS_WORD_LATENCY;
+                } else {
+                    privateAccess++;
+                    dragonCacheBlock.setState(DragonState.SC);
+                    return blockSize / Constants.BUS_WORD_LATENCY;
+
+                }
+
+        }
+        return 0;
+    }
+
+    protected DragonCacheBlock getCacheBlock(int address) {
+        int tag = super.getTag(address);
+        int lineNum = super.getLineNumber(address);
+
+        for (int i = 0; i < associativity; i++) {
+            if ((dragonCacheBlocks[lineNum][i].getTag() == tag)) {
+                return dragonCacheBlocks[lineNum][i];
+            }
+        }
+        return null;
+    }
+
+    private void busTransactionOver() {
+        boolean sharedSignal = (busController.checkExistenceInOtherCaches(this.id, currentAddress));
+        DragonCacheBlock cacheBlock = getCacheBlock(currentAddress);
+        if (currentType == CacheInstructionType.READ) {
+            if (cacheBlock.getState() == DragonState.NOT_IN_CACHE) {
+
+                cacheBlock.setState(sharedSignal ? DragonState.SC : DragonState.EXCLUSIVE);
+            }
+        } else {
+            cacheBlock.setState(sharedSignal ? DragonState.SM : DragonState.MODIFIED);
+        }
+        this.state = CacheState.IDLE;
+        this.cpu.wake();
+    }
+    int num = 0;
+    int cacheHit = 0;
+    CacheInstruction currentInstruction;
 
 
 }

@@ -98,7 +98,7 @@ public final class MesiCache extends Cache {
             }
         } else { // miss
 
-            if (instruction != currentInstruction){
+            if (instruction != currentInstruction) {
                 cacheMiss++;
             }
 
@@ -131,11 +131,7 @@ public final class MesiCache extends Cache {
         }
 
         boolean senderNeedsData;
-        if (cacheHit(currentAddress)) {
-            senderNeedsData = false;
-        } else {
-            senderNeedsData = true;
-        }
+        senderNeedsData = !cacheHit(currentAddress);
 
         return new Request(id, event, currentAddress, Constants.BUS_MESSAGE_CYCLES, senderNeedsData);
     }
@@ -186,22 +182,21 @@ public final class MesiCache extends Cache {
                     if (busEvent == BusEvent.BusRdX) {
                         cacheBlock.setMesiState(MesiState.INVALID);
                     }
-                    return blockSize / Constants.BUS_WORD_LATENCY;
+                    return (blockSize / Constants.BYTES_IN_WORD) * Constants.BUS_WORD_LATENCY;
                 case EXCLUSIVE:
                     if (busEvent == BusEvent.BusRd) {
                         cacheBlock.setMesiState(MesiState.SHARED);
                     } else {
                         cacheBlock.setMesiState(MesiState.INVALID);
                     }
-                    return blockSize / Constants.BUS_WORD_LATENCY;
+                    return (blockSize / Constants.BYTES_IN_WORD) * Constants.BUS_WORD_LATENCY;
                 case MODIFIED:
                     if (busEvent == BusEvent.BusRd) {
                         cacheBlock.setMesiState(MesiState.SHARED);
-                        return Constants.MEMORY_LATENCY + blockSize / Constants.BUS_WORD_LATENCY;
-
+                        return Constants.MEMORY_LATENCY;
                     } else if (busEvent == BusEvent.BusRdX) {
                         cacheBlock.setMesiState(MesiState.INVALID);
-                        return blockSize / Constants.BUS_WORD_LATENCY;
+                        return (blockSize / Constants.BYTES_IN_WORD) * Constants.BUS_WORD_LATENCY;
                     }
                     break;
             }

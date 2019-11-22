@@ -11,8 +11,8 @@ import cpu.Cpu;
 
 public abstract class Cache implements Clocked {
 
-    private int privateAccess;
-    private int  sharedAccess;
+    protected int privateAccess;
+    protected int sharedAccess;
     protected Cpu cpu;
     protected BusController busController;
     protected Bus bus;

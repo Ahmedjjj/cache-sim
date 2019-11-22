@@ -2,9 +2,8 @@ package cache;
 
 public abstract class CacheBlock {
 
-    private final int size;
-
     private int tag;
+    private final int size;
 
     public CacheBlock(int size) {
         this.size = size;

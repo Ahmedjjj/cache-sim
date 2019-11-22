@@ -1,14 +1,14 @@
 package dragon;
 
-import bus.BusEvent;
 import cache.CacheBlock;
 
 public class DragonCacheBlock extends CacheBlock {
 
     private DragonState state;
+
     public DragonCacheBlock(int size) {
         super(size);
-        this.state=DragonState.NOT_IN_CACHE;
+        this.state = DragonState.NOT_IN_CACHE;
     }
 
     public DragonState getState() {
@@ -19,8 +19,5 @@ public class DragonCacheBlock extends CacheBlock {
         this.state = state;
     }
 
-    @Override
-    public void update(BusEvent busEvent) {
 
-    }
 }

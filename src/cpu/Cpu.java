@@ -19,6 +19,8 @@ public final class Cpu implements Clocked {
     private int executingCyclesLeft;
     private int totalComputingCycles;
     private int totalIdleCycles;
+    private int numLoad;
+    private int numStore;
     private final Cache cache;
 
     public Cpu(Cache cache) {
@@ -29,8 +31,12 @@ public final class Cpu implements Clocked {
         this.state = CpuState.IDLE;
         this.instructions = new LinkedList<>();
         this.executingCyclesLeft = 0;
+
         this.totalComputingCycles = 0;
         this.totalIdleCycles = 0;
+        this.numLoad = 0;
+        this.numStore = 0;
+
     }
 
     public void runForOneCycle() {
@@ -54,9 +60,8 @@ public final class Cpu implements Clocked {
                     setState(CpuState.IDLE);
                 }
         }
-        if (!finishedExecution()) {
+        if (!finishedExecution())
             cycleCount++;
-        }
     }
 
     public void setInstructions(Queue<Instruction> instructions) {
@@ -84,6 +89,14 @@ public final class Cpu implements Clocked {
         return totalIdleCycles;
     }
 
+    public int getNumLoad() {
+        return numLoad;
+    }
+
+    public int getNumStore() {
+        return numStore;
+    }
+
     public boolean finishedExecution() {
         return this.instructions.isEmpty() && this.state == CpuState.IDLE;
     }
@@ -91,7 +104,7 @@ public final class Cpu implements Clocked {
     private void executeInstruction(Instruction instruction) {
         switch (instruction.getType()) {
             case READ: {
-
+                numLoad++;
                 CacheInstruction cacheInstruction = new CacheInstruction(CacheInstructionType.READ,
                         instruction.getSecondField());
                 cache.ask(cacheInstruction);
@@ -99,7 +112,7 @@ public final class Cpu implements Clocked {
                 break;
             }
             case WRITE: {
-
+                numStore++;
                 CacheInstruction cacheInstruction = new CacheInstruction(CacheInstructionType.WRITE,
                         instruction.getSecondField());
                 cache.ask(cacheInstruction);

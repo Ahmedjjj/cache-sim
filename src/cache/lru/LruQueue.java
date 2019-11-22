@@ -38,6 +38,7 @@ public final class LruQueue {
 
     private static class Node {
         private final int block;
+
         private Node(int block) {
             this.block = block;
         }
