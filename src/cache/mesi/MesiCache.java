@@ -121,6 +121,7 @@ public final class MesiCache extends Cache {
         if (currentType == CacheInstructionType.READ) {
             event = BusEvent.BusRd;
         } else {
+            nbInvalidations++;
             event = BusEvent.BusRdX;
         }
 

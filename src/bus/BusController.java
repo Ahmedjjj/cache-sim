@@ -2,7 +2,6 @@ package bus;
 
 
 import cache.Cache;
-import dragon.DragonState;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +11,6 @@ public final class BusController {
 
     private Bus bus;
     private Request currentRequest;
-    private Cache currentBusMaster;
     private int busTraffic;
     private final List<Cache> caches;
     private final Queue<Cache> cacheQueue;
@@ -20,7 +18,6 @@ public final class BusController {
     public BusController() {
         this.caches = new LinkedList<>();
         this.currentRequest = null;
-        this.bus = bus;
         this.cacheQueue = new LinkedList<>();
         busTraffic = 0;
 
@@ -43,15 +40,13 @@ public final class BusController {
             int extra = c.notifyRequestAndGetExtraCycles(currentRequest);
             if (extra > 0) {
                 extra_cycles = extra;
-                busTraffic += extra;
             }
         }
         if (extra_cycles > 0 && currentRequest.senderNeedsData()) {
+            busTraffic += extra_cycles;
             currentRequest.setCyclesToExecute(extra_cycles);
             currentRequest.setDataRequest(true);
         } else {
-
-            // Cache sender = caches.stream().filter(c -> c.getId() == currentRequest.getSenderId()).findFirst().get();
             setNewRequest();
         }
     }
@@ -61,18 +56,14 @@ public final class BusController {
     }
 
     public void queueUp(Cache cache) {
-        if (cacheQueue.contains(cache)) {
-            //
-        }
-        //System.out.println(cacheQueue);
-        //assert !cacheQueue.contains(cache);
+
+        assert !cacheQueue.contains(cache);
+
         if (cacheQueue.isEmpty() && currentRequest == null) {
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
-            this.currentBusMaster = cache;
         } else {
             this.cacheQueue.add(cache);
-
         }
     }
 
@@ -81,17 +72,16 @@ public final class BusController {
     }
 
     private void setNewRequest() {
-        //System.out.println("a");
+
         if (!cacheQueue.isEmpty()) {
             Cache cache = cacheQueue.poll();
-            // System.out.println(cache);
             this.currentRequest = cache.getRequest();
             this.bus.setCurrentRequest(currentRequest);
-            this.currentBusMaster = cache;
         } else {
             currentRequest = null;
             bus.setCurrentRequest(null);
         }
     }
-    DragonState statt;
+
+
 }

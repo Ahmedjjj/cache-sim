@@ -18,6 +18,7 @@ public abstract class Cache implements Clocked {
     protected BusController busController;
     protected Bus bus;
     protected CacheState state;
+    protected int  nbInvalidations;
     protected final int cacheSize;
     protected final int blockSize;
     protected final LruQueue[] lruQueues;
@@ -34,9 +35,14 @@ public abstract class Cache implements Clocked {
         this.numLines = cacheSize / (blockSize * associativity);
         this.lruQueues = new LruQueue[this.numLines];
         this.state = CacheState.IDLE;
+        this.nbInvalidations = 0;
         for (int i = 0; i < numLines; i++) {
             lruQueues[i] = new LruQueue(associativity);
         }
+    }
+
+    public int getNbInvalidations() {
+        return nbInvalidations;
     }
 
     public void linkCpu(Cpu cpu) {
