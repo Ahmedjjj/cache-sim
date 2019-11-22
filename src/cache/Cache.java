@@ -9,7 +9,6 @@ import common.Clocked;
 import cpu.Cpu;
 
 
-
 public abstract class Cache implements Clocked {
 
     protected int privateAccess;
@@ -18,7 +17,7 @@ public abstract class Cache implements Clocked {
     protected BusController busController;
     protected Bus bus;
     protected CacheState state;
-    protected int  nbInvalidations;
+    protected int nbInvalidations;
     protected final int cacheSize;
     protected final int blockSize;
     protected final LruQueue[] lruQueues;
@@ -83,6 +82,8 @@ public abstract class Cache implements Clocked {
     public Cpu getCpu() {
         return cpu;
     }
+
+    public abstract int getDataSent();
 
     public abstract boolean cacheHit(int address);
 

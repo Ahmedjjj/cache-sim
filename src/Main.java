@@ -2,10 +2,10 @@ import bus.Bus;
 import bus.BusController;
 import cache.Cache;
 import cache.Protocol;
+import cache.dragon.DragonCache;
 import cache.mesi.MesiCache;
 import common.Constants;
 import cpu.Cpu;
-import cache.dragon.DragonCache;
 import instruction.Instruction;
 import instruction.InstructionParser;
 
@@ -58,7 +58,7 @@ public final class Main {
 
         }
         runUntilEnd(processors, caches, bus);
-        printResults(processors, caches, bus, controller,protocol);
+        printResults(processors, caches, bus, controller, protocol);
     }
 
     private static void runUntilEnd(List<Cpu> processors, List<Cache> caches, Bus bus) {
@@ -76,7 +76,7 @@ public final class Main {
         return processors.stream().allMatch(p -> p.finishedExecution());
     }
 
-    private static void printResults(List<Cpu> processors, List<Cache> caches, Bus bus, BusController controller ,Protocol protocol) {
+    private static void printResults(List<Cpu> processors, List<Cache> caches, Bus bus, BusController controller, Protocol protocol) {
         List<Long> executionCycle = new ArrayList<>(Constants.NUM_CPUS);
         processors.forEach(p -> executionCycle.add(p.getCycleCount()));
         long maxExecutionCycle = Collections.max(executionCycle);
@@ -88,15 +88,24 @@ public final class Main {
         processors.forEach(p -> System.out.println("Number of Store instructions for core " + processors.indexOf(p) + ": " + p.getNumStore()));
         processors.forEach(p -> System.out.println("Number of Idle cycles for core " + processors.indexOf(p) + ": " + p.getTotalIdleCycles()));
         caches.forEach(c -> System.out.println("Cache miss rate for cache " + c.getId() + ": " + c.getMissRate()));
-        caches.forEach(c -> System.out.println("Number of cache miss for cache " + c.getId() + ": " + c.getNbCacheMiss()));
-        System.out.println("Data traffic on the bus in bytes: " + controller.getBusTraffic());
-        System.out.println("Number of invalidations on the bus: " + getTotalNumOfInvalidations(caches));
+        System.out.println("Average cache miss rate "+ getAverageMissRate(caches));
+        caches.forEach(c -> System.out.println("Number of private accesses for cache " + c.getId() + ": " + c.getPrivateAccess()));
+        caches.forEach(c -> System.out.println("Number of shared accesses for cache " + c.getId() + ": " + c.getSharedAccess()));
 
-        //System.out.println("Number of accesses to private data: " + Cache.getPrivateAccess());
-        //System.out.println("Number of accesses to shared data: " + Cache.getSharedAccess());
+
+        if (protocol == Protocol.MESI) {
+            System.out.println("Number of invalidations on the bus: " + getTotalNumOfInvalidations(caches));
+        } else {
+            System.out.println("Number of updates on the bus: " + getTotalNumOfInvalidations(caches));
+        }
+        System.out.println("Data Sent on the bus :" + controller.getBusTraffic());
+
     }
-    private static int getTotalNumOfInvalidations (List<Cache> caches){
-        return caches.stream().map(c -> c.getNbInvalidations()).reduce(0,(a,b)-> a + b );
+    private static double getAverageMissRate (List<Cache> caches){
+        return  caches.stream().map(c -> c.getMissRate()).reduce((a, b) -> a + b).get() / 4;
+    }
+    private static int getTotalNumOfInvalidations(List<Cache> caches) {
+        return caches.stream().map(c -> c.getNbInvalidations()).reduce(0, (a, b) -> a + b);
     }
 
 }

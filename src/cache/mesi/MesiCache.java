@@ -27,6 +27,7 @@ public final class MesiCache extends Cache {
                 cacheBlocks[i][j] = new MesiCacheBlock(blockSize);
             }
         }
+        this.dataSent = 0;
         this.memoryCycles = 0;
     }
 
@@ -50,8 +51,6 @@ public final class MesiCache extends Cache {
                 break;
         }
     }
-
-
 
     @Override
     public String toString() {
@@ -139,6 +138,12 @@ public final class MesiCache extends Cache {
         return cacheMiss;
     }
 
+    public int getDataSent() {
+        int tmp = dataSent;
+        dataSent = 0;
+        return tmp;
+    }
+
     @Override
     protected int receiveMessage(Request request) {
 
@@ -166,11 +171,13 @@ public final class MesiCache extends Cache {
         if (cacheBlock != null) {
             switch (cacheBlock.getMesiState()) {
                 case INVALID:
+                    dataSent = 0;
                     return 0;
                 case SHARED:
                     if (busEvent == BusEvent.BusRdX) {
                         cacheBlock.setMesiState(MesiState.INVALID);
                     }
+                    dataSent = blockSize;
                     return (blockSize / Constants.BYTES_IN_WORD) * Constants.BUS_WORD_LATENCY;
                 case EXCLUSIVE:
                     if (busEvent == BusEvent.BusRd) {
@@ -178,13 +185,15 @@ public final class MesiCache extends Cache {
                     } else {
                         cacheBlock.setMesiState(MesiState.INVALID);
                     }
+                    dataSent = blockSize;
                     return (blockSize / Constants.BYTES_IN_WORD) * Constants.BUS_WORD_LATENCY;
                 case MODIFIED:
+                    dataSent = blockSize;
                     if (busEvent == BusEvent.BusRd) {
                         cacheBlock.setMesiState(MesiState.SHARED);
-                        if (state == CacheState.WAITING_FOR_MEMORY){
+                        if (state == CacheState.WAITING_FOR_MEMORY) {
                             return memoryCycles + (blockSize / Constants.BYTES_IN_WORD) * Constants.BUS_WORD_LATENCY;
-                        }else {
+                        } else {
                             return Constants.MEMORY_LATENCY;
                         }
                     } else if (busEvent == BusEvent.BusRdX) {
@@ -252,4 +261,5 @@ public final class MesiCache extends Cache {
         }
         return -1;
     }
+    int dataSent;
 }

@@ -21,6 +21,7 @@ public final class BusController {
         this.cacheQueue = new LinkedList<>();
         busTraffic = 0;
 
+
     }
 
     public void attachTo(Bus bus) {
@@ -35,16 +36,18 @@ public final class BusController {
     public void alert() {
         assert currentRequest != null;
 
+        Cache sender = null;
         int extra_cycles = 0;
         for (Cache c : caches) {
             int extra = c.notifyRequestAndGetExtraCycles(currentRequest);
             if (extra > 0) {
+                sender = c;
                 extra_cycles = extra;
             }
         }
 
         if (extra_cycles > 0 && currentRequest.senderNeedsData()) {
-            busTraffic += extra_cycles;
+            busTraffic += sender.getDataSent();
             currentRequest.setCyclesToExecute(extra_cycles);
             currentRequest.setDataRequest(true);
         } else {
