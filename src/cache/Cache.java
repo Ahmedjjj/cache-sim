@@ -73,10 +73,6 @@ public abstract class Cache implements Clocked {
         return id;
     }
 
-    public Bus getBus() {
-        return bus;
-    }
-
     public Cpu getCpu() {
         return cpu;
     }
@@ -86,7 +82,7 @@ public abstract class Cache implements Clocked {
     public abstract int getNbCacheMiss();
 
     public double getMissRate() {
-        double missRate = ((double) getNbCacheMiss()) / getCpu().getInstructionCount();
+        double missRate = ((double) getNbCacheMiss()) / getCpu().getCacheInstructionCount();
         return missRate * 100;
     }
 
