@@ -125,10 +125,8 @@ public final class MesiCache extends Cache {
             nbInvalidations++;
             event = BusEvent.BusRdX;
         }
-
         boolean senderNeedsData;
         senderNeedsData = !cacheHit(currentAddress);
-
         return new Request(id, event, currentAddress, Constants.BUS_MESSAGE_CYCLES, senderNeedsData);
     }
 

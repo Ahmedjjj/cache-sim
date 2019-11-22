@@ -42,6 +42,7 @@ public final class BusController {
                 extra_cycles = extra;
             }
         }
+
         if (extra_cycles > 0 && currentRequest.senderNeedsData()) {
             busTraffic += extra_cycles;
             currentRequest.setCyclesToExecute(extra_cycles);
