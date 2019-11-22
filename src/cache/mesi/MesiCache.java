@@ -183,7 +183,11 @@ public final class MesiCache extends Cache {
                 case MODIFIED:
                     if (busEvent == BusEvent.BusRd) {
                         cacheBlock.setMesiState(MesiState.SHARED);
-                        return Constants.MEMORY_LATENCY;
+                        if (state == CacheState.WAITING_FOR_MEMORY){
+                            return memoryCycles + (blockSize / Constants.BYTES_IN_WORD) * Constants.BUS_WORD_LATENCY;
+                        }else {
+                            return Constants.MEMORY_LATENCY;
+                        }
                     } else if (busEvent == BusEvent.BusRdX) {
                         cacheBlock.setMesiState(MesiState.INVALID);
                         return (blockSize / Constants.BYTES_IN_WORD) * Constants.BUS_WORD_LATENCY;
