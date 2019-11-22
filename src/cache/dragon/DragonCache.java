@@ -29,6 +29,7 @@ public class DragonCache extends Cache {
         }
         cacheMiss = 0;
         memoryCycles = 0;
+        currentInstruction=null;
     }
 
     @Override
@@ -151,8 +152,11 @@ public class DragonCache extends Cache {
         this.currentType = instruction.getCacheInstructionType();
         int line = getLineNumber(currentAddress);
         int tag = getTag(currentAddress);
+        if(cacheHit(currentAddress)){
+            lruQueues[line].update(getBlockNumber(currentAddress));
+           // currentInstruction=instruction;
+        }
         switch (state) {
-
             case EXCLUSIVE:
             case MODIFIED:
                 this.state = CacheState.WAITING_FOR_CACHE_HIT;
@@ -217,5 +221,18 @@ public class DragonCache extends Cache {
         return new Request(id, event, currentAddress, Constants.BUS_MESSAGE_CYCLES, senderNeedsData);
     }
 
+    private int getBlockNumber(int address) {
+        int tag = super.getTag(address);
+        int lineNum = super.getLineNumber(address);
+
+        for (int i = 0; i < associativity; i++) {
+            if ((dragonCacheBlocks[lineNum][i].getTag() == tag)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 }
+
 
