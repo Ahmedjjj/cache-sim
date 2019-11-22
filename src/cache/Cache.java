@@ -5,11 +5,9 @@ import bus.BusController;
 import bus.Request;
 import cache.instruction.CacheInstruction;
 import cache.lru.LruQueue;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import common.Clocked;
 import cpu.Cpu;
 
-import java.lang.invoke.ConstantCallSite;
 
 
 public abstract class Cache implements Clocked {
